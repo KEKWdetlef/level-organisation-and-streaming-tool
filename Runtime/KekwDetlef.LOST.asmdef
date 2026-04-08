@@ -1,0 +1,14 @@
+{
+    "name": "KekwDetlef.LOST",
+    "rootNamespace": "KekwDetlef.LOST",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

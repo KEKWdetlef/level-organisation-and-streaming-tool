@@ -1,0 +1,14 @@
+{
+  "name": "com.kekw-detlef.level-organisation-and-streaming-tool",
+  "displayName": "level-organisation-and-streaming-tool",
+  "version": "0.1.0",
+  "unity": "6000.4",
+  "dependencies": {
+    "com.unity.test-framework": "1.6.0"
+  },
+  "author": {
+    "name": "Tom Sch\u00fcler alias KEKW Detlef",
+    "url": "https://level-organisation-and-streaming-tool.kekw-detlef.com",
+    "email": "tom.schueler01@t-online.de"
+  }
+}
