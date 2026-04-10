@@ -8,7 +8,6 @@ namespace KekwDetlef.LOST
     internal class Unloading : RegionState
     {
         private AssetReference sceneAssetReference;
-        private LoadSceneMode loadSceneMode;
         private int priority;
 
         private ProceedWith proceedWith;
@@ -27,16 +26,15 @@ namespace KekwDetlef.LOST
         {
             switch(proceedWith)
             {
-                case ProceedWith.Load: { ChangeState(new Loading(OnChangeState, sceneAssetReference, loadSceneMode, priority)); } break;
+                case ProceedWith.Load: { ChangeState(new Loading(OnChangeState, sceneAssetReference, priority)); } break;
                 case ProceedWith.Unload: { ChangeState(new Free(OnChangeState)); } break;
             }
         }
 
-        internal override void Load(AssetReference sceneAssetReference, LoadSceneMode loadSceneMode, int priority)
+        internal override void Load(AssetReference sceneAssetReference, int priority)
         {
             this.sceneAssetReference = sceneAssetReference;
             this.priority = priority;
-            this.loadSceneMode = loadSceneMode;
             
             proceedWith = ProceedWith.Load;
         }

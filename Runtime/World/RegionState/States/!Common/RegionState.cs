@@ -15,7 +15,7 @@ namespace KekwDetlef.LOST
             this.onChangeState = onChangeState;
         }
 
-        internal abstract void Load(AssetReference sceneAssetReference, LoadSceneMode loadSceneMode, int priority);
+        internal abstract void Load(AssetReference sceneAssetReference, int priority);
         internal abstract void Unload();
 
         protected void ChangeState(RegionState newState)

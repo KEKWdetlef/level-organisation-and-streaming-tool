@@ -10,7 +10,7 @@ namespace KekwDetlef.LOST
     {
         private ProceedWith proceedWith;
 
-        internal Loading(Action<RegionState> onChangeState, AssetReference sceneAssetReference, LoadSceneMode loadSceneMode, int priority) : base(onChangeState)
+        internal Loading(Action<RegionState> onChangeState, AssetReference sceneAssetReference, int priority) : base(onChangeState)
         {
             proceedWith = ProceedWith.Load;
             
@@ -42,7 +42,7 @@ namespace KekwDetlef.LOST
             }
         }
 
-        internal override void Load(AssetReference sceneAssetReference, LoadSceneMode loadSceneMode, int priority) => proceedWith = ProceedWith.Load;
+        internal override void Load(AssetReference sceneAssetReference, int priority) => proceedWith = ProceedWith.Load;
         internal override void Unload() => proceedWith = ProceedWith.Unload;
     }
 }

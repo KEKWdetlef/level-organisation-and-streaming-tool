@@ -43,12 +43,12 @@ namespace KekwDetlef.LOST
             RegionHandle newLevelHandle = new RegionHandle(sceneAssetReference);
             if (levelHandle.Equals(newLevelHandle))
             {
-                levelHandle.Load(LoadSceneMode.Single, priority: 100);
+                levelHandle.Load(priority: 100);
             }
             else
             {
                 levelHandle.Unload();
-                newLevelHandle.Load(LoadSceneMode.Single, priority: 100);
+                newLevelHandle.Load(priority: 100);
                 levelHandle = newLevelHandle;
             }
 

@@ -8,18 +8,16 @@ namespace KekwDetlef.LOST
     internal class Reloading : RegionState
     {
         private readonly AssetReference sceneAssetReference;
-        private readonly LoadSceneMode loadSceneMode;
         private int priority;
 
         private ProceedWith proceedWith;
 
-        internal Reloading(Action<RegionState> onChangeState, AsyncOperationHandle currentHandle, AssetReference sceneAssetReference, LoadSceneMode loadSceneMode, int priority) : base(onChangeState)
+        internal Reloading(Action<RegionState> onChangeState, AsyncOperationHandle currentHandle, AssetReference sceneAssetReference, int priority) : base(onChangeState)
         {
             proceedWith = ProceedWith.Load;
 
             this.sceneAssetReference = sceneAssetReference;
             this.priority = priority;
-            this.loadSceneMode = loadSceneMode;
 
             AsyncOperationHandle newHandle = Addressables.UnloadSceneAsync(currentHandle, autoReleaseHandle: true);
             newHandle.Completed += Proceede;
@@ -36,12 +34,12 @@ namespace KekwDetlef.LOST
 
             switch(proceedWith)
             {
-                case ProceedWith.Load: { ChangeState(new Loading(OnChangeState, sceneAssetReference, loadSceneMode, priority)); } break;
+                case ProceedWith.Load: { ChangeState(new Loading(OnChangeState, sceneAssetReference, priority)); } break;
                 case ProceedWith.Unload: { ChangeState(new Free(OnChangeState)); } break;
             }
         }
 
-        internal override void Load(AssetReference sceneAssetReference, LoadSceneMode loadSceneMode, int priority)
+        internal override void Load(AssetReference sceneAssetReference, int priority)
         {
             this.priority = priority;
             proceedWith = ProceedWith.Load;

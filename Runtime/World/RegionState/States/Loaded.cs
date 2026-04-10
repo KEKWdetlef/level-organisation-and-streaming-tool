@@ -14,7 +14,7 @@ namespace KekwDetlef.LOST
             this.handle = handle;
         }
         
-        internal override void Load(AssetReference sceneAssetReference, LoadSceneMode loadSceneMode, int priority) => ChangeState(new Reloading(OnChangeState, handle, sceneAssetReference, loadSceneMode, priority));
+        internal override void Load(AssetReference sceneAssetReference, int priority) => ChangeState(new Reloading(OnChangeState, handle, sceneAssetReference, priority));
         internal override void Unload() => ChangeState(new Unloading(OnChangeState, handle));
     }
 }

@@ -8,7 +8,7 @@ namespace KekwDetlef.LOST
     {
         internal Free(Action<RegionState> onChangeState) : base(onChangeState) { }
 
-        internal override void Load(AssetReference sceneAssetReference, LoadSceneMode loadSceneMode, int priority) => ChangeState(new Loading(OnChangeState, sceneAssetReference, loadSceneMode, priority));
+        internal override void Load(AssetReference sceneAssetReference, int priority) => ChangeState(new Loading(OnChangeState, sceneAssetReference, priority));
         internal override void Unload() { }
     }
 }

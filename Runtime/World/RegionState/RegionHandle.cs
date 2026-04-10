@@ -17,7 +17,7 @@ namespace KekwDetlef.LOST
             currentState = new Free(ChangeState);
         }
 
-        internal void Load(LoadSceneMode loadSceneMode, int priority) => currentState.Load(sceneAssetReference, loadSceneMode, priority);
+        internal void Load(int priority) => currentState.Load(sceneAssetReference, priority);
         internal void Unload() => currentState.Unload();
 
         private void ChangeState(RegionState newState) => currentState = newState;
