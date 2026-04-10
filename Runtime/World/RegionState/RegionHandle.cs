@@ -1,33 +1,58 @@
 using System;
+using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
-using UnityEngine.SceneManagement;
 
 namespace KekwDetlef.LOST
 {
     internal class RegionHandle : IEquatable<RegionHandle>, IEquatable<AssetReference>
     {
         private readonly AssetReference sceneAssetReference;
-        private RegionState currentState;
+        private IRegionState currentState;
 
         public bool Free => currentState is Free;
 
         internal RegionHandle(AssetReference sceneAssetReference)
         {
             this.sceneAssetReference = sceneAssetReference;
-            currentState = new Free(ChangeState);
+            currentState = new Free();
         }
 
-        internal void Load(int priority) => currentState.Load(sceneAssetReference, priority);
-        internal void Unload() => currentState.Unload();
+        internal async Task Load(int priority)
+        {
+            IRegionState newState = await currentState.Load(sceneAssetReference, priority);
+            await ChangeState(newState);
+        }
 
-        private void ChangeState(RegionState newState) => currentState = newState;
+        internal async Task Unload()
+        {
+            IRegionState newState = await currentState.Unload();
+            await ChangeState(newState);
+        }
+
+
+        // PROBLEM: Make this not be recursive
+        // private async Task ChangeState(IRegionState newState)
+        // {
+        //     while (newState != null)
+        //     {
+        //         currentState = newState;
+        //         newState = await currentState.Execute();
+        //     }
+        // }
+        private async Task ChangeState(IRegionState newState)
+        {
+            if (newState != null)
+            {
+                currentState = newState;
+                await ChangeState(await newState.Execute());
+            }
+        }
 
 #region IEquatable
         public bool Equals(RegionHandle other) => new AssetReferenceGuidComparer().Equals(sceneAssetReference, other.sceneAssetReference);
         public bool Equals(AssetReference other) => new AssetReferenceGuidComparer().Equals(sceneAssetReference, other);
         public override bool Equals(object obj) => Equals(obj as RegionHandle);
         public override int GetHashCode() => new AssetReferenceGuidComparer().GetHashCode(sceneAssetReference);
-
 #endregion // IEquatable
     }
 }

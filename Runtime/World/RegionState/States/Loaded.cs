@@ -1,20 +1,20 @@
-using System;
+using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.SceneManagement;
 
 namespace KekwDetlef.LOST
 {
-    internal class Loaded : RegionState
+    internal class Loaded : IRegionState
     {
         private AsyncOperationHandle handle;
 
-        internal Loaded(Action<RegionState> onChangeState, AsyncOperationHandle handle) : base(onChangeState)
+        internal Loaded(AsyncOperationHandle handle)
         {
             this.handle = handle;
         }
-        
-        internal override void Load(AssetReference sceneAssetReference, int priority) => ChangeState(new Reloading(OnChangeState, handle, sceneAssetReference, priority));
-        internal override void Unload() => ChangeState(new Unloading(OnChangeState, handle));
+
+        async Task<IRegionState> IRegionState.Execute() => null;
+        async Task<IRegionState> IRegionState.Load(AssetReference sceneAssetReference, int priority) => new Reloading(handle, sceneAssetReference, priority);
+        async Task<IRegionState> IRegionState.Unload() => new Unloading(handle);
     }
 }

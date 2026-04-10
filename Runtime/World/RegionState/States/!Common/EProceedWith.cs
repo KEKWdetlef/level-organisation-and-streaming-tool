@@ -1,10 +1,8 @@
-using UnityEngine;
-
 namespace KekwDetlef.LOST
 {
-    internal enum ProceedWith
+    internal enum Procedure
     {
-        Load,
-        Unload,
+        Default,
+        Other,
     }
 }
