@@ -2,7 +2,9 @@
     "name": "KekwDetlef.LOST.Editor",
     "rootNamespace": "KekwDetlef.LOST.Editor",
     "references": [
-        "KekwDetlef.LOST"
+        "KekwDetlef.LOST",
+        "Unity.Addressables",
+        "KekwDetlef.SerializedCollections"
     ],
     "includePlatforms": [
         "Editor"
