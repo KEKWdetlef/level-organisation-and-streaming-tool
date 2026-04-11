@@ -13,6 +13,12 @@ namespace KekwDetlef.LOST
 
         private WorldState() { }
 
+        /// <summary>
+        /// Initializes the world state and loads the initial level. (Does not unload the scene this is initialzed from, 
+        /// for example the a bootstrap scene.)
+        /// </summary>
+        /// <param name="initialLevel"> The scene that is initialy loaded as a level. Crashes if not valid or not a scene. </param>
+        /// <returns> Whether the world state was initialized successfully. Returns false if the world state is already initialized. </returns>
         public static bool Initialize(AssetReference initialLevel) 
         {
             if (instance != null) 
