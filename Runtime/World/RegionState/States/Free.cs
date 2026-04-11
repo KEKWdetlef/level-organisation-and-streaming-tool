@@ -1,12 +1,11 @@
-using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 
 namespace KekwDetlef.LOST
 {
-    internal class Free : IRegionState
+    internal class Free : RegionState
     {
-        async Task<IRegionState> IRegionState.Execute() => null;
-        async Task<IRegionState> IRegionState.Load(AssetReference sceneAssetReference, int priority) => new Loading(sceneAssetReference, priority);
-        async Task<IRegionState> IRegionState.Unload() => null;
+        protected override IRegionState OnExecute() => null;
+        protected override IRegionState OnLoad(AssetReference sceneAssetReference, int priority) => new Loading(sceneAssetReference, priority);
+        protected override IRegionState OnUnload() => null;
     }
 }

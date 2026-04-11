@@ -12,6 +12,8 @@ namespace KekwDetlef.LOST
         private Task executionTask = null;
         private Procedure currentProcedure = Procedure.Default;
 
+        void IDisposable.Dispose() => currentCts?.Dispose();
+
         Task<IRegionState> IRegionState.Execute()
         {
             executionTask = OnExecute();
@@ -20,13 +22,6 @@ namespace KekwDetlef.LOST
 
         Task<IRegionState> IRegionState.Load(AssetReference sceneAssetReference, int priority) => GetCurrentTask(GetLoadProcedure(sceneAssetReference, priority), OnLoad);
         Task<IRegionState> IRegionState.Unload() => GetCurrentTask(GetUnloadProcedure(), OnUnload);
-
-        protected abstract Task OnExecute();
-        protected abstract IRegionState OnExecutionFinished();
-        protected abstract IRegionState OnLoad();
-        protected abstract IRegionState OnUnload();
-        protected abstract Procedure GetLoadProcedure(AssetReference sceneAssetReference, int priority);
-        protected abstract Procedure GetUnloadProcedure();
 
         private Task<IRegionState> GetCurrentTask(Procedure procedure, Func<IRegionState> getNewState)
         {
@@ -40,9 +35,9 @@ namespace KekwDetlef.LOST
         }
 
         // PROBLEM: i am not quite sure this works how i want it to
-        private async Task<IRegionState> CreateNewTask(Procedure procedure, Func<IRegionState> getNewState)
+        private async Task<IRegionState> CreateNewTask(Procedure newProcedure, Func<IRegionState> getNewState)
         {
-            currentProcedure = procedure;
+            currentProcedure = newProcedure;
 
             CancellationTokenSource previousCts = currentCts;
             previousCts?.Cancel();
@@ -59,5 +54,13 @@ namespace KekwDetlef.LOST
 
             return getNewState?.Invoke();
         }
+
+        protected abstract Task OnExecute();
+        protected abstract IRegionState OnExecutionFinished();
+        protected abstract IRegionState OnLoad();
+        protected abstract IRegionState OnUnload();
+        protected abstract Procedure GetLoadProcedure(AssetReference sceneAssetReference, int priority);
+        protected abstract Procedure GetUnloadProcedure();
     }
+
 }

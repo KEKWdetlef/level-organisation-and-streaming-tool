@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 
@@ -12,17 +13,17 @@ namespace KekwDetlef.LOST
 
         private WorldState() { }
 
-        internal static void Initialize(AssetReference initialLevel) 
+        public static bool Initialize(AssetReference initialLevel) 
         {
             if (instance != null) 
             {
                 // should probaby throw error here or smthing 
-                return; 
+                return false; 
             }
 
             instance = new WorldState();
-
             instance.LoadLevel(initialLevel);
+            return true;
         }
 
         public static bool GetInstance(out WorldState instance)
@@ -35,42 +36,75 @@ namespace KekwDetlef.LOST
         private RegionHandle levelHandle;
         private readonly HashSet<RegionHandle> regionHandles = new HashSet<RegionHandle>();
 
-        public void LoadLevel(AssetReference sceneAssetReference)
+        private bool isTearingDown = false;
+        private bool isLoadingNewLevel = false;
+
+        public async void LoadLevel(AssetReference sceneAssetReference)
         {
-            Scene test = SceneManager.CreateScene("test");
-            UnloadAllRegions();
+            if (isLoadingNewLevel) { return; }
+
+            isLoadingNewLevel = true;
+            await LoadLevelInternal(sceneAssetReference);
+            isLoadingNewLevel = false;
+        }
+
+        private async Task LoadLevelInternal(AssetReference sceneAssetReference)
+        {
+            // TODO: just have this be a random combination of letters and numbers also maybe document that this name is reserved for the package (can not be used by user)
+            Scene tempScene = SceneManager.CreateScene("TemporaryVoidScene");
+
+            await TearDown();
 
             RegionHandle newLevelHandle = new RegionHandle(sceneAssetReference);
             if (levelHandle.Equals(newLevelHandle))
             {
-                levelHandle.Load(priority: 100);
+                await levelHandle.Load(priority: 100);
             }
             else
             {
-                levelHandle.Unload();
-                newLevelHandle.Load(priority: 100);
+                Task unloadTask = levelHandle.Unload();
+                Task loadTask = newLevelHandle.Load(priority: 100);
+
+                await Task.WhenAll(new [] {unloadTask, loadTask});
                 levelHandle = newLevelHandle;
             }
 
-            SceneManager.UnloadSceneAsync(test);
+            SceneManager.UnloadSceneAsync(tempScene);
         }
 
-        private void UnloadAllRegions()
+        private async Task TearDown()
         {
-            foreach (RegionHandle regionHandle in regionHandles)
-            {
-                regionHandle.Unload();
-            }
+            isTearingDown = true;
+
+            List<Task> tasks = UnloadAllRegions();
+            tasks.Add(levelHandle.Unload());
+            await Task.WhenAll(tasks);
+
+            isTearingDown = false;
         }
 
-        private void UnloadAllRegions(AssetReference[] exceptions)
+        private List<Task> UnloadAllRegions()
         {
+            List<Task> result = new List<Task>();
             foreach (RegionHandle regionHandle in regionHandles)
             {
-                if (AnyEquals(regionHandle, exceptions)) { return; }
-
-                regionHandle.Unload();
+                Task task = regionHandle.Unload();
+                result.Add(task);
             }
+            return result;
+        }
+
+        private List<Task> UnloadAllRegions(AssetReference[] exceptions)
+        {
+            List<Task> result = new List<Task>();
+            foreach (RegionHandle regionHandle in regionHandles)
+            {
+                if (AnyEquals(regionHandle, exceptions)) { continue; }
+
+                Task task = regionHandle.Unload();
+                result.Add(task);
+            }
+            return result;
         }
 
         private bool AnyEquals(RegionHandle regionHandle, AssetReference[] exceptions)

@@ -19,32 +19,30 @@ namespace KekwDetlef.LOST
 
         internal async Task Load(int priority)
         {
-            IRegionState newState = await currentState.Load(sceneAssetReference, priority);
-            await ChangeState(newState);
+            try
+            {
+                IRegionState newState = await currentState.Load(sceneAssetReference, priority);
+                await ChangeState(newState);
+            }
+            catch(OperationCanceledException) { }
         }
 
         internal async Task Unload()
         {
-            IRegionState newState = await currentState.Unload();
-            await ChangeState(newState);
+            try
+            {
+                IRegionState newState = await currentState.Unload();
+                await ChangeState(newState);
+            }
+            catch(OperationCanceledException) { }
         }
 
-
-        // PROBLEM: Make this not be recursive
-        // private async Task ChangeState(IRegionState newState)
-        // {
-        //     while (newState != null)
-        //     {
-        //         currentState = newState;
-        //         newState = await currentState.Execute();
-        //     }
-        // }
         private async Task ChangeState(IRegionState newState)
         {
-            if (newState != null)
+            while (newState != null)
             {
                 currentState = newState;
-                await ChangeState(await newState.Execute());
+                newState = await currentState.Execute();
             }
         }
 
