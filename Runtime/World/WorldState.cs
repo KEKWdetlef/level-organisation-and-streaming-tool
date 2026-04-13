@@ -5,12 +5,15 @@ using UnityEngine.SceneManagement;
 
 namespace KekwDetlef.LOST
 {
+    /// <summary>
+    /// Singleton representing the state of the world, meaning current level and regions. Main API for any world manipulation such as loading a level, region, etc..
+    /// </summary>
     public class WorldState
     {
     
 #region Singleton
         private static WorldState instance = null;
-
+ 
         private WorldState() { }
 
         /// <summary>
@@ -18,7 +21,7 @@ namespace KekwDetlef.LOST
         /// for example the a bootstrap scene.)
         /// </summary>
         /// <param name="initialLevel"> The scene that is initialy loaded as a level. Crashes if not valid or not a scene. </param>
-        /// <returns> Whether the world state was initialized successfully. Returns false if the world state is already initialized. </returns>
+        /// <returns> Returns false if the world state is already initialized, otherwise true. </returns>
         public static bool Initialize(AssetReference initialLevel) 
         {
             if (instance != null) 
@@ -32,6 +35,11 @@ namespace KekwDetlef.LOST
             return true;
         }
 
+        /// <summary>
+        /// Gets reference to the instance of the "WorldState" singleton. 
+        /// </summary>
+        /// <param name="instance"> Outputs the singleton instance of the "WorldState". Null if return value is false. </param>
+        /// <returns> Whether the instance is valid. Invalid if the "WorldState" has not been initialized. </returns>
         public static bool GetInstance(out WorldState instance)
         {
             instance = WorldState.instance;
