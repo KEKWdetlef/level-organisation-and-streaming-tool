@@ -4,6 +4,8 @@ namespace KekwDetlef.LOST
 {
     internal static class LOSTHelper
     {
+        internal static string InvalidWorldStateErrorMessage => "TODO: write InvalidWorldStateErrorMessage";
+
         // TODO: Improve this pls
         internal static void AssertHandleValid(AsyncOperationHandle handle)
         {
@@ -12,5 +14,6 @@ namespace KekwDetlef.LOST
                 throw new System.Exception();
             }
         }
+
     }
 }

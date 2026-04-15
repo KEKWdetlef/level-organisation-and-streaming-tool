@@ -13,7 +13,19 @@ namespace KekwDetlef.LOST
         }
 
         protected override IRegionState OnExecute() => null;
-        protected override IRegionState OnLoad(AssetReference sceneAssetReference, int priority) => new Reloading(handle, sceneAssetReference, priority);
+        
+        protected override IRegionState OnLoad(AssetReference sceneAssetReference, int priority, bool shouldReload)
+        {
+            if (shouldReload)
+            {
+                return new Reloading(handle, sceneAssetReference, priority);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         protected override IRegionState OnUnload() => new Unloading(handle);
     }
 }

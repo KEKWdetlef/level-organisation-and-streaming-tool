@@ -17,11 +17,11 @@ namespace KekwDetlef.LOST
             currentState = new Free();
         }
 
-        internal async Task Load(int priority)
+        internal async Task Load(int priority, bool shouldReload)
         {
             try
             {
-                IRegionState newState = await currentState.Load(sceneAssetReference, priority);
+                IRegionState newState = await currentState.Load(sceneAssetReference, priority, shouldReload);
                 await ChangeState(newState);
             }
             catch(OperationCanceledException) { }

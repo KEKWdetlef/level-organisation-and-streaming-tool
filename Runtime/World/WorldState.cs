@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
@@ -47,15 +48,16 @@ namespace KekwDetlef.LOST
         }
 #endregion // Singleton
 
-        private RegionHandle levelHandle;
-        private readonly HashSet<RegionHandle> regionHandles = new HashSet<RegionHandle>();
+        private RegionHandle currentLevelRegionHandle;
+
+        private readonly Dictionary<int, RegionHandle> regionHandles = new Dictionary<int, RegionHandle>();
 
         private bool isTearingDown = false;
         private bool isLoadingNewLevel = false;
 
         public async void LoadLevel(AssetReference sceneAssetReference)
         {
-            if (isLoadingNewLevel) { return; }
+            if (isLoadingNewLevel || isTearingDown) { return; }
 
             isLoadingNewLevel = true;
             await LoadLevelInternal(sceneAssetReference);
@@ -69,18 +71,19 @@ namespace KekwDetlef.LOST
 
             await TearDown();
 
-            RegionHandle newLevelHandle = new RegionHandle(sceneAssetReference);
-            if (levelHandle.Equals(newLevelHandle))
+            if (CompareHash(currentLevelRegionHandle, sceneAssetReference))
             {
-                await levelHandle.Load(priority: 100);
+                await currentLevelRegionHandle.Load(priority: 100, shouldReload: true);
             }
             else
             {
-                Task unloadTask = levelHandle.Unload();
-                Task loadTask = newLevelHandle.Load(priority: 100);
+                RegionHandle newLevelRegionHandle = new RegionHandle(sceneAssetReference);
+
+                Task unloadTask = currentLevelRegionHandle.Unload();
+                Task loadTask = newLevelRegionHandle.Load(priority: 100, shouldReload: true);
 
                 await Task.WhenAll(new [] {unloadTask, loadTask});
-                levelHandle = newLevelHandle;
+                currentLevelRegionHandle = newLevelRegionHandle;
             }
 
             SceneManager.UnloadSceneAsync(tempScene);
@@ -90,48 +93,109 @@ namespace KekwDetlef.LOST
         {
             isTearingDown = true;
 
-            List<Task> tasks = UnloadAllRegions();
-            tasks.Add(levelHandle.Unload());
+            Task[] tasks = UnloadAllRegionsInternal();
+            await currentLevelRegionHandle.Unload();
             await Task.WhenAll(tasks);
 
             isTearingDown = false;
         }
 
-        private List<Task> UnloadAllRegions()
+        public void SetRegionsLoaded(RegionLoadInfo[] loadInfos)
         {
-            List<Task> result = new List<Task>();
-            foreach (RegionHandle regionHandle in regionHandles)
+            if (isTearingDown) { return; }
+
+            int length = loadInfos.Length;
+            AssetReference[] exceptions = new AssetReference[length];
+
+            for (int i = 0; i < length; i++)
             {
-                Task task = regionHandle.Unload();
-                result.Add(task);
+                RegionLoadInfo loadInfo = loadInfos[i];
+                exceptions[i] = loadInfo.SceneAssetReference;
             }
-            return result;
+
+            UnloadAllRegions(exceptions);
+            LoadRegions(loadInfos);
         }
 
-        private List<Task> UnloadAllRegions(AssetReference[] exceptions)
+        public void LoadRegions(RegionLoadInfo[] loadInfos)
         {
-            List<Task> result = new List<Task>();
-            foreach (RegionHandle regionHandle in regionHandles)
-            {
-                if (AnyEquals(regionHandle, exceptions)) { continue; }
+            if (isTearingDown) { return; }
 
-                Task task = regionHandle.Unload();
-                result.Add(task);
-            }
-            return result;
-        }
+            AssetReferenceGuidComparer comparer = new AssetReferenceGuidComparer();
 
-        private bool AnyEquals(RegionHandle regionHandle, AssetReference[] exceptions)
-        {
-            foreach (AssetReference exception in exceptions)
+            foreach (RegionLoadInfo loadInfo in loadInfos)
             {
-                if (regionHandle.Equals(exception))
+                int hashCode = comparer.GetHashCode(loadInfo.SceneAssetReference);
+                if (regionHandles.TryGetValue(hashCode, out RegionHandle regionHandle))
                 {
-                    return true;
+                    _ = regionHandle.Load(loadInfo.Priority, loadInfo.ShouldReload);
+                }
+                else
+                {
+                    RegionHandle newRegionHandle = new RegionHandle(loadInfo.SceneAssetReference);
+                    _ = newRegionHandle.Load(loadInfo.Priority, loadInfo.ShouldReload);
+                    regionHandles.Add(newRegionHandle.GetHashCode(), newRegionHandle);
                 }
             }
-
-            return false;
         }
+
+        public void UnloadRegions(AssetReference[] sceneAssetReferences)
+        {
+            if (isTearingDown) { return; }
+
+            AssetReferenceGuidComparer comparer = new AssetReferenceGuidComparer();
+
+            foreach (AssetReference sceneAssetReference in sceneAssetReferences)
+            {
+                int hashCode = comparer.GetHashCode(sceneAssetReference);
+                if (regionHandles.TryGetValue(hashCode, out RegionHandle regionHandle))
+                {
+                    _ = regionHandle.Unload();
+                }
+            }
+        }
+
+        public void UnloadAllRegions()
+        {
+            if (isTearingDown) { return; }
+
+            UnloadAllRegionsInternal();
+        }
+
+        private Task[] UnloadAllRegionsInternal()
+        {
+            Task[] result = new Task[regionHandles.Count];
+            
+            int index = 0;
+            foreach (var regionHandle in regionHandles)
+            {
+                result[index] =regionHandle.Value.Unload();
+                index++;
+            }
+            return result;
+        }
+
+        private Task[] UnloadAllRegions(AssetReference[] exceptions)
+        {
+            HashSet<int> regionHandleHashCodes = regionHandles.Keys.ToHashSet();
+            foreach(AssetReference exception in exceptions)
+            {
+                regionHandleHashCodes.Remove(new AssetReferenceGuidComparer().GetHashCode(exception));
+            }
+
+            Task[] result = new Task[regionHandleHashCodes.Count];
+            
+            int index = 0;
+            foreach (int hashCode in regionHandleHashCodes)
+            {
+                RegionHandle regionHandle = regionHandles[hashCode];
+                result[index] = regionHandle.Unload();
+                index++;
+            }
+            
+            return result;
+        }
+
+        private bool CompareHash(RegionHandle regionHandle, AssetReference sceneAssetReference) => new AssetReferenceGuidComparer().GetHashCode(sceneAssetReference) == regionHandle.GetHashCode();
     }
 }

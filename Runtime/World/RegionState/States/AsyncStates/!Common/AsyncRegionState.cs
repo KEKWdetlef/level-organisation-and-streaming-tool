@@ -20,7 +20,7 @@ namespace KekwDetlef.LOST
             return GetCurrentTask(Procedure.Default, OnExecutionFinished);
         }
 
-        Task<IRegionState> IRegionState.Load(AssetReference sceneAssetReference, int priority) => GetCurrentTask(GetLoadProcedure(sceneAssetReference, priority), OnLoad);
+        Task<IRegionState> IRegionState.Load(AssetReference sceneAssetReference, int priority, bool shouldReload) => GetCurrentTask(GetLoadProcedure(sceneAssetReference, priority), OnLoad);
         Task<IRegionState> IRegionState.Unload() => GetCurrentTask(GetUnloadProcedure(), OnUnload);
 
         private Task<IRegionState> GetCurrentTask(Procedure procedure, Func<IRegionState> getNewState)
