@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 
@@ -34,6 +35,15 @@ namespace KekwDetlef.LOST
 
             instance = new WorldState();
             instance.LoadLevel(initialLevel);
+
+            // todo: fix the timer cuz i am certain this does not work yet the way i intend it to
+            // TODO: make this a mutable value in the project settings
+            Timer gcTimer = instance.gcTimer;
+            gcTimer.Interval = 5000;
+            gcTimer.AutoReset = true;
+            gcTimer.Elapsed += instance.CollectGarbage;
+            gcTimer.Start();
+
             return true;
         }
 
@@ -49,8 +59,9 @@ namespace KekwDetlef.LOST
         }
 #endregion // Singleton
 
-        private RegionHandle currentLevelRegionHandle;
+        private readonly Timer gcTimer = new Timer();
 
+        private RegionHandle currentLevelRegionHandle;
         private readonly Dictionary<int, RegionHandle> regionHandles = new Dictionary<int, RegionHandle>();
 
         private bool isTearingDown = false;
@@ -170,7 +181,7 @@ namespace KekwDetlef.LOST
             int index = 0;
             foreach (var regionHandle in regionHandles)
             {
-                result[index] =regionHandle.Value.Unload();
+                result[index] = regionHandle.Value.Unload();
                 index++;
             }
             return result;
@@ -195,6 +206,26 @@ namespace KekwDetlef.LOST
             }
             
             return result;
+        }
+
+        // i think that this might be unsafe cuz runs on different thread maybe (honest no clue tho)
+        private void CollectGarbage(object sender, ElapsedEventArgs e)
+        {
+            List<int> freeHandlesHash = new List<int>();
+            foreach (var pair in regionHandles)
+            {
+                RegionHandle regionHandle = pair.Value;
+
+                if (regionHandle.IsFree)
+                {
+                    freeHandlesHash.Add(pair.Key);
+                }
+            }
+
+            foreach (int hash in freeHandlesHash)
+            {
+                regionHandles.Remove(hash);
+            }
         }
 
         private bool CompareHash(RegionHandle regionHandle, AssetReference sceneAssetReference) => new AssetReferenceGuidComparer().GetHashCode(sceneAssetReference) == regionHandle.GetHashCode();

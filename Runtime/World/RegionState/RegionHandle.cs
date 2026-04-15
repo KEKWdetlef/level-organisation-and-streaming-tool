@@ -9,7 +9,7 @@ namespace KekwDetlef.LOST
         private readonly AssetReference sceneAssetReference;
         private IRegionState currentState;
 
-        public bool Free => currentState is Free;
+        public bool IsFree => currentState is Free;
 
         internal RegionHandle(AssetReference sceneAssetReference)
         {
