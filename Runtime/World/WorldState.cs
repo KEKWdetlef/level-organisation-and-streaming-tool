@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 
+// TODO: wrap scene manager functionality, so that i can confidantly say you should not use scene manager for anything
 namespace KekwDetlef.LOST
 {
     /// <summary>
