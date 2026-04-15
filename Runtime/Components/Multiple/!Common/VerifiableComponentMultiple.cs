@@ -37,29 +37,37 @@ namespace KekwDetlef.LOST
 
         protected virtual void OnAfterValidate() { }
 
-        // TODO: poll the error messages
         private bool GetRuntimeDatas(out TRuntime[] runtimeDatas, out string errorMessage)
         {
+            bool result = true;
+            errorMessage = string.Empty;
+
             List<TRuntime> datas = new List<TRuntime>();
             foreach (var pair in verifiables)
             {
                 foreach (TEditor verifiable in pair.Value)
                 {
-                    if (verifiable.Verify(out TRuntime runtimeData, out errorMessage))
+                    if (verifiable.Verify(out TRuntime runtimeData, out string verifyErrorMessage))
                     {
                         datas.Add(runtimeData);
                     }
                     else
                     {
-                        runtimeDatas = null;
-                        return false;
+                        errorMessage += $"\n\n {verifyErrorMessage}";
+                        result = false;
                     }
                 }
             }
 
-            runtimeDatas = datas.ToArray();
-            errorMessage = null;
-            return true;
+            if (result)
+            {
+                runtimeDatas = datas.ToArray();
+                errorMessage = null;
+                return true;
+            }
+
+            runtimeDatas = null;
+            return false;
         }
 
         protected sealed override bool Editor_OnVerify(out string errorMessage)
