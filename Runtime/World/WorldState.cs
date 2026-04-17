@@ -19,7 +19,29 @@ namespace KekwDetlef.LOST
 #region Singleton
         private static WorldState instance = null;
  
-        private WorldState() { }
+        private WorldState(AssetReference initialLevel)
+        {
+            // TODO: document that this name is taken
+            // TODO: what if creating the scene faild
+            Scene emptyVoid = SceneManager.CreateScene("EmptyVoid");
+
+            LoadFirstLevel(initialLevel);
+
+            // todo: fix the timer cuz i am certain this does not work yet the way i intend it to
+            // TODO: make this a mutable value in the project settings
+
+            gcTimer = new Timer
+            {
+                Interval = 5000,
+                AutoReset = true
+            };
+
+            gcTimer.Elapsed += CollectGarbage;
+            gcTimer.Start();
+
+            // TODO: chat gpt says that "Application.quitting" might never be called on some devices such as mobile phones. potentioally unsafe. 
+            Application.quitting += Dispose;
+        }
 
         /// <summary>
         /// Initializes the world state and loads the initial level. (Does not unload the scene this is initialzed from, 
@@ -27,24 +49,14 @@ namespace KekwDetlef.LOST
         /// </summary>
         /// <param name="initialLevel"> The scene that is initialy loaded as a level. Crashes if not valid or not a scene. </param>
         /// <returns> Returns false if the world state is already initialized, otherwise true. </returns>
-        public static bool Initialize(AssetReference initialLevel) 
+        public static bool Initialize(Scene bootScene, AssetReference initialLevel) 
         {
-            if (instance != null)  { return false; }
+            if (instance != null) { return false; }
 
-            instance = new WorldState();
-            instance.LoadLevel(initialLevel);
+            instance = new WorldState(initialLevel);
 
-            // todo: fix the timer cuz i am certain this does not work yet the way i intend it to
-            // TODO: make this a mutable value in the project settings
-            Timer gcTimer = instance.gcTimer;
-            gcTimer.Interval = 5000;
-            gcTimer.AutoReset = true;
-            gcTimer.Elapsed += instance.CollectGarbage;
-            gcTimer.Start();
-
-            // TODO: chat gpt says that "Application.quitting" might never be called on some devices such as mobile phones. potentioally unsafe. 
-            Application.quitting += instance.Dispose;
-
+            // this is potentialy a problem but it should be as save call
+            _ = SceneManager.UnloadSceneAsync(bootScene);
             return true;
         }
 
@@ -60,13 +72,26 @@ namespace KekwDetlef.LOST
         }
 #endregion // Singleton
 
-        private readonly Timer gcTimer = new Timer();
+        private readonly Timer gcTimer;
 
         private RegionHandle currentLevelRegionHandle;
         private readonly Dictionary<int, RegionHandle> regionHandles = new Dictionary<int, RegionHandle>();
 
         private bool isTearingDown = false;
         private bool isLoadingNewLevel = false;
+
+        private async void LoadFirstLevel(AssetReference sceneAssetReference)
+        {
+            if (currentLevelRegionHandle != null) { return; }
+
+            isLoadingNewLevel = true;
+            
+            RegionHandle newRegionHandle = new RegionHandle(sceneAssetReference);
+            await newRegionHandle.Load(priority: 100, shouldReload: false);
+            currentLevelRegionHandle = newRegionHandle;
+
+            isLoadingNewLevel = false;
+        }
 
         public async void LoadLevel(AssetReference sceneAssetReference)
         {
@@ -79,9 +104,6 @@ namespace KekwDetlef.LOST
 
         private async Task LoadLevelInternal(AssetReference sceneAssetReference)
         {
-            // TODO: just have this be a random combination of letters and numbers also maybe document that this name is reserved for the package (can not be used by user)
-            Scene tempScene = SceneManager.CreateScene("TemporaryVoidScene");
-
             await TearDown();
 
             if (CompareHash(currentLevelRegionHandle, sceneAssetReference))
@@ -92,14 +114,12 @@ namespace KekwDetlef.LOST
             {
                 RegionHandle newLevelRegionHandle = new RegionHandle(sceneAssetReference);
 
-                Task unloadTask = currentLevelRegionHandle.Unload();
+                Task unloadTask = currentLevelRegionHandle?.Unload();
                 Task loadTask = newLevelRegionHandle.Load(priority: 100, shouldReload: true);
 
                 await Task.WhenAll(new [] {unloadTask, loadTask});
                 currentLevelRegionHandle = newLevelRegionHandle;
             }
-
-            _ = SceneManager.UnloadSceneAsync(tempScene);
         }
 
         private async Task TearDown()
@@ -107,7 +127,7 @@ namespace KekwDetlef.LOST
             isTearingDown = true;
 
             Task[] tasks = UnloadAllRegionsInternal();
-            await currentLevelRegionHandle.Unload();
+            await currentLevelRegionHandle?.Unload();
             await Task.WhenAll(tasks);
 
             isTearingDown = false;

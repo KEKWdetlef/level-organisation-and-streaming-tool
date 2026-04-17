@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,30 +13,14 @@ namespace KekwDetlef.LOST
         {
             get
             {
-                instance ??= InitializeInternal();
+                instance ??= new Viewport();
                 return instance;
             }
         }
 
-        private Viewport() { }
-
-        public static void Initialize()
+        private Viewport()
         {
-            instance ??= InitializeInternal();
-        }
-
-        private static Viewport InitializeInternal()
-        {
-            Viewport viewport = new Viewport();
-            viewport.Create();
-            return viewport;
-        }
-#endregion // Singleton
-
-        private Scene viewport;
-
-        private void Create()
-        {
+            // TODO: document that this name is taken
             Scene viewport = SceneManager.CreateScene("Viewport");
             if (viewport.IsValid())
             {
@@ -49,14 +31,22 @@ namespace KekwDetlef.LOST
             // TODO: what if creating the scene faild
         }
 
+        public static void Initialize()
+        {
+            instance ??= new Viewport();
+        }
+#endregion // Singleton
+
+        private readonly Scene viewport;
+
         public T Add<T>(T original) where T : Object => (T)Object.Instantiate(original, viewport);
 
         public void RemoveAll()
         {
-            GameObject[] widgets = viewport.GetRootGameObjects();
-            foreach (Object widget in widgets)
+            GameObject[] objects = viewport.GetRootGameObjects();
+            foreach (Object obj in objects)
             {
-                Object.Destroy(widget);
+                Object.Destroy(obj);
             }
         }
     }
