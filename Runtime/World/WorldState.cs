@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 
 // TODO: wrap scene manager functionality, so that i can confidantly say you should not use scene manager for anything
+// TODO: check if the a providet scene for anything with the regions is the current level scene.
 namespace KekwDetlef.LOST
 {
     /// <summary>
@@ -27,11 +29,7 @@ namespace KekwDetlef.LOST
         /// <returns> Returns false if the world state is already initialized, otherwise true. </returns>
         public static bool Initialize(AssetReference initialLevel) 
         {
-            if (instance != null) 
-            {
-                // should probaby throw error here or smthing 
-                return false; 
-            }
+            if (instance != null)  { return false; }
 
             instance = new WorldState();
             instance.LoadLevel(initialLevel);
@@ -43,6 +41,9 @@ namespace KekwDetlef.LOST
             gcTimer.AutoReset = true;
             gcTimer.Elapsed += instance.CollectGarbage;
             gcTimer.Start();
+
+            // TODO: chat gpt says that "Application.quitting" might never be called on some devices such as mobile phones. potentioally unsafe. 
+            Application.quitting += instance.Dispose;
 
             return true;
         }
@@ -98,7 +99,7 @@ namespace KekwDetlef.LOST
                 currentLevelRegionHandle = newLevelRegionHandle;
             }
 
-            SceneManager.UnloadSceneAsync(tempScene);
+            _ = SceneManager.UnloadSceneAsync(tempScene);
         }
 
         private async Task TearDown()
@@ -226,6 +227,11 @@ namespace KekwDetlef.LOST
             {
                 regionHandles.Remove(hash);
             }
+        }
+
+        private void Dispose()
+        {
+            gcTimer.Dispose();
         }
 
         private bool CompareHash(RegionHandle regionHandle, AssetReference sceneAssetReference) => new AssetReferenceGuidComparer().GetHashCode(sceneAssetReference) == regionHandle.GetHashCode();
