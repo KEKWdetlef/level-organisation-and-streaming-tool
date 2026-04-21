@@ -41,6 +41,7 @@ namespace KekwDetlef.LOST
         {
             while (newState != null)
             {
+                currentState.Dispose();
                 currentState = newState;
                 newState = await currentState.Execute();
             }
