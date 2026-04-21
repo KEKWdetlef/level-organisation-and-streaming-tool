@@ -15,5 +15,9 @@ namespace KekwDetlef.LOST
             }
         }
 
+        internal static void FailedToCreateScene()
+        {
+            throw new System.Exception("TODO: write failed to create scene exception");
+        }
     }
 }

@@ -21,15 +21,17 @@ namespace KekwDetlef.LOST
  
         private WorldState(AssetReference initialLevel)
         {
-            // TODO: document that this name is taken
-            // TODO: what if creating the scene faild
             Scene emptyVoid = SceneManager.CreateScene("EmptyVoid");
+            if (!emptyVoid.IsValid())
+            {
+                Helper.FailedToCreateScene();
+                return;
+            }
 
             LoadFirstLevel(initialLevel);
 
             // todo: fix the timer cuz i am certain this does not work yet the way i intend it to
             // TODO: make this a mutable value in the project settings
-
             gcTimer = new Timer
             {
                 Interval = 5000,
