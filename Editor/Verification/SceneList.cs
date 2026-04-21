@@ -6,7 +6,7 @@ using UnityEngine.AddressableAssets;
 namespace KekwDetlef.LOST.Editor
 {
     [CreateAssetMenu(fileName = "SceneList", menuName = "LOST/SceneList")]
-    public class SceneList : LOST.BaseSceneList
+    public class SceneList : BaseSceneList
     {
         // PROBLEM: research what happens if a not addressable asset keeps beeing referenced. 
         [SerializeField] private SCHashSet<SceneAssetReference, AssetReferenceGuidComparer> sceneAssetReferences = new();

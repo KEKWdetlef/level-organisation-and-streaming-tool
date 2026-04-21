@@ -3,6 +3,9 @@ using UnityEngine.SceneManagement;
 
 namespace KekwDetlef.LOST
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Viewport
     {
 
@@ -31,6 +34,9 @@ namespace KekwDetlef.LOST
             // TODO: what if creating the scene faild
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static void Initialize()
         {
             instance ??= new Viewport();
@@ -39,8 +45,17 @@ namespace KekwDetlef.LOST
 
         private readonly Scene viewport;
 
-        public T Add<T>(T original) where T : Object => (T)Object.Instantiate(original, viewport);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="original"></param>
+        /// <returns></returns>
+        public T Instantiate<T>(T original) where T : Widget => (T)Object.Instantiate(original, viewport);
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void RemoveAll()
         {
             GameObject[] objects = viewport.GetRootGameObjects();

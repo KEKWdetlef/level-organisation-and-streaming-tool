@@ -25,7 +25,7 @@ namespace KekwDetlef.LOST
         
         protected override IRegionState OnExecutionFinished()
         {
-            LOSTHelper.AssertHandleValid(unloadHandle);
+            Helper.AssertHandleValid(unloadHandle);
             currentHandle.Release();
             unloadHandle.Release();
             return new Free();
@@ -33,7 +33,7 @@ namespace KekwDetlef.LOST
 
         protected override IRegionState OnLoad()
         {
-            LOSTHelper.AssertHandleValid(unloadHandle);
+            Helper.AssertHandleValid(unloadHandle);
             currentHandle.Release();
             unloadHandle.Release();
             return new Loading(sceneAssetReference, priority);

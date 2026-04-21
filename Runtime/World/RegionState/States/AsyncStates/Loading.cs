@@ -34,7 +34,7 @@ namespace KekwDetlef.LOST
 
         protected override IRegionState OnExecutionFinished()
         {
-            LOSTHelper.AssertHandleValid(handle);
+            Helper.AssertHandleValid(handle);
             return new Loaded(handle);
         }
 
@@ -42,7 +42,7 @@ namespace KekwDetlef.LOST
 
         protected override IRegionState OnUnload()
         {
-            LOSTHelper.AssertHandleValid(handle);
+            Helper.AssertHandleValid(handle);
             return new Unloading(handle);
         }
 

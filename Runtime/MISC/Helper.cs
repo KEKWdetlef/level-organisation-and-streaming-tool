@@ -2,7 +2,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace KekwDetlef.LOST
 {
-    internal static class LOSTHelper
+    internal static class Helper
     {
         internal static string InvalidWorldStateErrorMessage => "TODO: write InvalidWorldStateErrorMessage";
 

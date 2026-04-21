@@ -15,7 +15,7 @@ namespace KekwDetlef.LOST
                 return true;
             }
 
-            errorMessage = LOSTHelper.InvalidWorldStateErrorMessage;
+            errorMessage = Helper.InvalidWorldStateErrorMessage;
             return false;
         }
 #endif // UNITY_EDITOR
