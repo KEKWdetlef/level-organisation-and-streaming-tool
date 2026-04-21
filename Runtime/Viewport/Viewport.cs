@@ -37,7 +37,7 @@ namespace KekwDetlef.LOST
         }
 
         /// <summary>
-        /// 
+        /// Initializes the viewport. Can be omited if you want the viewport to be Initialized lazy.
         /// </summary>
         public static void Initialize()
         {
