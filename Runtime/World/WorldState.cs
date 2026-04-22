@@ -31,9 +31,9 @@ namespace KekwDetlef.LOST
             LoadFirstLevel(initialLevel);
 
             // todo: fix the timer cuz i am certain this does not work yet the way i intend it to
-            // TODO: make this a mutable value in the project settings
             gcTimer = new Timer
             {
+                // TODO: make this a mutable value in the project settings
                 Interval = 5000,
                 AutoReset = true
             };
@@ -51,14 +51,11 @@ namespace KekwDetlef.LOST
         /// </summary>
         /// <param name="initialLevel"> The scene that is initialy loaded as a level. Crashes if not valid or not a scene. </param>
         /// <returns> Returns false if the world state is already initialized, otherwise true. </returns>
-        public static bool Initialize(Scene bootScene, AssetReference initialLevel) 
+        public static bool Initialize(AssetReference initialLevel) 
         {
             if (instance != null) { return false; }
 
             instance = new WorldState(initialLevel);
-
-            // this is potentialy a problem but it should be as save call
-            _ = SceneManager.UnloadSceneAsync(bootScene);
             return true;
         }
 

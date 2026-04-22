@@ -8,7 +8,7 @@ namespace KekwDetlef.LOST
 #if UNITY_EDITOR
         protected override bool Editor_OnRun(AssetReference sceneAssetReference, out string errorMessage)
         {
-            if (WorldState.Initialize(gameObject.scene, sceneAssetReference))
+            if (WorldState.Initialize(sceneAssetReference))
             {
                 errorMessage = null;
                 return true;
@@ -23,7 +23,7 @@ namespace KekwDetlef.LOST
         {
             if (sceneAssetReference == null) { return; }
 
-            WorldState.Initialize(gameObject.scene, sceneAssetReference);
+            WorldState.Initialize(sceneAssetReference);
         }
     }
 }
