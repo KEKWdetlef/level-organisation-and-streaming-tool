@@ -6,7 +6,7 @@ namespace KekwDetlef.LOST
     {
 
 #if UNITY_EDITOR
-        internal void Editor_Run(AssetReference sceneAssetReference)
+        public void Editor_Run(AssetReference sceneAssetReference)
         {
             // TODO: make sure AssetReference is valid and a scene
 

@@ -1,46 +1,16 @@
 using KekwDetlef.LOST;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.SceneManagement;
 
-public class Boot : MonoBehaviour
+public abstract class Boot : MonoBehaviour
 {
+    [SerializeField] protected InitializeWorld initializeWorld;
 
 #if UNITY_EDITOR
-    private AssetReference injectedSceneAssetReference = null;
-
-    internal void InjectSceneAssetReference(AssetReference sceneAssetReference) => injectedSceneAssetReference = sceneAssetReference;
-
-    private void Editor_InitializeWorld()
-    {
-        if (injectedSceneAssetReference != null)
-        {
-            initializeWorld.Editor_Run(injectedSceneAssetReference);
-        }
-        else
-        {
-            InitializeWorld();
-        }
-    }
-#endif // UNITY_EDITOR
-
-    [SerializeField] private InitializeWorld initializeWorld;
-
-    private void Start()
-    {
-
-#if UNITY_EDITOR
-        Editor_InitializeWorld();
+    internal abstract void Editor_Run(AssetReference sceneAssetReference);
 #else
-        InitializeWorld();
+    protected void Start() => Run();
+    protected abstract void Run();
 #endif // UNITY_EDITOR
 
-        Viewport.Initialize();
-        _ = SceneManager.UnloadSceneAsync(gameObject.scene);
-    }
-
-    private void InitializeWorld()
-    {
-        initializeWorld.Run();
-    }
 }
