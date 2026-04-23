@@ -4,7 +4,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace KekwDetlef.LOST
 {
-    internal class Reloading : AsyncRegionState
+    internal class Reloading : AsyncRegionLoadState
     {
         private readonly AsyncOperationHandle currentHandle;
         private readonly AssetReference sceneAssetReference;
@@ -26,7 +26,7 @@ namespace KekwDetlef.LOST
             return unloadHandle.Task;
         }
         
-        protected override IRegionState OnExecutionFinished()
+        protected override RegionLoadState OnExecutionFinished()
         {
             Helper.AssertHandleValid(unloadHandle);
             currentHandle.Release();
@@ -34,14 +34,14 @@ namespace KekwDetlef.LOST
             return new Loading(sceneAssetReference, priority);
         }
 
-        protected override IRegionState OnLoad() => OnExecutionFinished();
+        protected override RegionLoadState OnLoad() => OnExecutionFinished();
 
-        protected override IRegionState OnUnload()
+        protected override RegionLoadState OnUnload()
         {
             Helper.AssertHandleValid(unloadHandle);
             currentHandle.Release();
             unloadHandle.Release();
-            return new Free();
+            return new Unloaded();
         }
 
         protected override Procedure GetLoadProcedure(AssetReference sceneAssetReference, int priority)

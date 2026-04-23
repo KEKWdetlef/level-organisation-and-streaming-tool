@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 namespace KekwDetlef.LOST
 {
-    internal class Loading : AsyncRegionState
+    internal class Loading : AsyncRegionLoadState
     {
         private readonly AssetReference sceneAssetReference;
         private readonly int priority;
@@ -32,15 +32,15 @@ namespace KekwDetlef.LOST
             return handle.Task;
         }
 
-        protected override IRegionState OnExecutionFinished()
+        protected override RegionLoadState OnExecutionFinished()
         {
             Helper.AssertHandleValid(handle);
             return new Loaded(handle);
         }
 
-        protected override IRegionState OnLoad() => OnExecutionFinished();
+        protected override RegionLoadState OnLoad() => OnExecutionFinished();
 
-        protected override IRegionState OnUnload()
+        protected override RegionLoadState OnUnload()
         {
             Helper.AssertHandleValid(handle);
             return new Unloading(handle);

@@ -5,25 +5,25 @@ using UnityEngine.AddressableAssets;
 
 namespace KekwDetlef.LOST
 {
-    internal abstract class AsyncRegionState : IRegionState
+    internal abstract class AsyncRegionLoadState : RegionLoadState
     {
         private CancellationTokenSource currentCts = null;
-        private Task<IRegionState> currentTask = null;
+        private Task<RegionLoadState> currentTask = null;
         private Task executionTask = null;
         private Procedure currentProcedure = Procedure.Default;
 
-        void IDisposable.Dispose() => currentCts?.Dispose();
+        protected sealed override void OnDispose() => currentCts?.Dispose();
 
-        Task<IRegionState> IRegionState.Execute()
+        internal sealed override Task<RegionLoadState> Execute()
         {
             executionTask = OnExecute();
             return GetCurrentTask(Procedure.Default, OnExecutionFinished);
         }
 
-        Task<IRegionState> IRegionState.Load(AssetReference sceneAssetReference, int priority, bool shouldReload) => GetCurrentTask(GetLoadProcedure(sceneAssetReference, priority), OnLoad);
-        Task<IRegionState> IRegionState.Unload() => GetCurrentTask(GetUnloadProcedure(), OnUnload);
+        internal sealed override Task<RegionLoadState> Load(AssetReference sceneAssetReference, int priority, bool shouldReload) => GetCurrentTask(GetLoadProcedure(sceneAssetReference, priority), OnLoad);
+        internal sealed override Task<RegionLoadState> Unload() => GetCurrentTask(GetUnloadProcedure(), OnUnload);
 
-        private Task<IRegionState> GetCurrentTask(Procedure procedure, Func<IRegionState> getNewState)
+        private Task<RegionLoadState> GetCurrentTask(Procedure procedure, Func<RegionLoadState> getNewState)
         {
             if (currentTask != null && procedure == currentProcedure)
             {
@@ -35,7 +35,7 @@ namespace KekwDetlef.LOST
         }
 
         // PROBLEM: i am not quite sure this works how i want it to
-        private async Task<IRegionState> CreateNewTask(Procedure newProcedure, Func<IRegionState> getNewState)
+        private async Task<RegionLoadState> CreateNewTask(Procedure newProcedure, Func<RegionLoadState> getNewState)
         {
             currentProcedure = newProcedure;
 
@@ -56,9 +56,9 @@ namespace KekwDetlef.LOST
         }
 
         protected abstract Task OnExecute();
-        protected abstract IRegionState OnExecutionFinished();
-        protected abstract IRegionState OnLoad();
-        protected abstract IRegionState OnUnload();
+        protected abstract RegionLoadState OnExecutionFinished();
+        protected abstract RegionLoadState OnLoad();
+        protected abstract RegionLoadState OnUnload();
         protected abstract Procedure GetLoadProcedure(AssetReference sceneAssetReference, int priority);
         protected abstract Procedure GetUnloadProcedure();
     }

@@ -5,7 +5,7 @@ namespace KekwDetlef.LOST
 #if UNITY_EDITOR
         protected override bool Editor_OnRun(out string errorMessage)
         {
-            if (WorldState.GetInstance(out WorldState instance))
+            if (World.GetInstance(out World instance))
             {
                 instance.UnloadAllRegions();
                 errorMessage = null;
@@ -19,7 +19,7 @@ namespace KekwDetlef.LOST
 
         protected override void OnRun()
         {
-            if (WorldState.GetInstance(out WorldState instance))
+            if (World.GetInstance(out World instance))
             {
                 instance.UnloadAllRegions();
             }

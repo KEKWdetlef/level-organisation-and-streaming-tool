@@ -8,7 +8,7 @@ namespace KekwDetlef.LOST
 #if UNITY_EDITOR
         protected override bool Editor_OnRun(AssetReference sceneAssetReference, out string errorMessage)
         {
-            if (WorldState.GetInstance(out WorldState instance))
+            if (World.GetInstance(out World instance))
             {
                 instance.LoadLevel(sceneAssetReference);
                 errorMessage = null;
@@ -22,7 +22,7 @@ namespace KekwDetlef.LOST
 
         protected override void OnRun(AssetReference sceneAssetReference)
         {
-            if (WorldState.GetInstance(out WorldState instance))
+            if (World.GetInstance(out World instance))
             {
                 instance.LoadLevel(sceneAssetReference);
             }

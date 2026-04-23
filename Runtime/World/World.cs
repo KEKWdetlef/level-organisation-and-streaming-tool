@@ -13,13 +13,13 @@ namespace KekwDetlef.LOST
     /// <summary>
     /// Singleton representing the state of the world, meaning current level and regions. Main API for any world manipulation such as loading a level, region, etc..
     /// </summary>
-    public class WorldState
+    public class World
     {
     
 #region Singleton
-        private static WorldState instance = null;
+        private static World instance = null;
  
-        private WorldState(AssetReference initialLevel)
+        private World(AssetReference initialLevel)
         {
             Scene emptyVoid = SceneManager.CreateScene("EmptyVoid");
             if (!emptyVoid.IsValid())
@@ -55,7 +55,7 @@ namespace KekwDetlef.LOST
         {
             if (instance != null) { return false; }
 
-            instance = new WorldState(initialLevel);
+            instance = new World(initialLevel);
             return true;
         }
 
@@ -64,17 +64,21 @@ namespace KekwDetlef.LOST
         /// </summary>
         /// <param name="instance"> Outputs the singleton instance of the "WorldState". Null if return value is false. </param>
         /// <returns> Whether the instance is valid. Invalid if the "WorldState" has not been initialized. </returns>
-        public static bool GetInstance(out WorldState instance)
+        public static bool GetInstance(out World instance)
         {
-            instance = WorldState.instance;
-            return WorldState.instance != null;
+            instance = World.instance;
+            return World.instance != null;
         }
 #endregion // Singleton
 
         private readonly Timer gcTimer;
 
-        private RegionHandle currentLevelRegionHandle;
-        private readonly Dictionary<int, RegionHandle> regionHandles = new Dictionary<int, RegionHandle>();
+        private Region currentLevelRegionHandle;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private readonly Dictionary<int, Region> regionsByHash = new Dictionary<int, Region>();
 
         private bool isTearingDown = false;
         private bool isLoadingNewLevel = false;
@@ -85,7 +89,7 @@ namespace KekwDetlef.LOST
 
             isLoadingNewLevel = true;
             
-            RegionHandle newRegionHandle = new RegionHandle(sceneAssetReference);
+            Region newRegionHandle = new Region(sceneAssetReference);
             await newRegionHandle.Load(priority: 100, shouldReload: false);
             currentLevelRegionHandle = newRegionHandle;
 
@@ -105,13 +109,13 @@ namespace KekwDetlef.LOST
         {
             await TearDown();
 
-            if (CompareHash(currentLevelRegionHandle, sceneAssetReference))
+            if (IsCurrentlyLoadedLevel(sceneAssetReference))
             {
                 await currentLevelRegionHandle.Load(priority: 100, shouldReload: true);
             }
             else
             {
-                RegionHandle newLevelRegionHandle = new RegionHandle(sceneAssetReference);
+                Region newLevelRegionHandle = new Region(sceneAssetReference);
 
                 Task unloadTask = currentLevelRegionHandle?.Unload();
                 Task loadTask = newLevelRegionHandle.Load(priority: 100, shouldReload: true);
@@ -158,15 +162,15 @@ namespace KekwDetlef.LOST
             foreach (RegionLoadInfo loadInfo in loadInfos)
             {
                 int hashCode = comparer.GetHashCode(loadInfo.SceneAssetReference);
-                if (regionHandles.TryGetValue(hashCode, out RegionHandle regionHandle))
+                if (regionsByHash.TryGetValue(hashCode, out Region regionHandle))
                 {
                     _ = regionHandle.Load(loadInfo.Priority, loadInfo.ShouldReload);
                 }
                 else
                 {
-                    RegionHandle newRegionHandle = new RegionHandle(loadInfo.SceneAssetReference);
+                    Region newRegionHandle = new Region(loadInfo.SceneAssetReference);
                     _ = newRegionHandle.Load(loadInfo.Priority, loadInfo.ShouldReload);
-                    regionHandles.Add(newRegionHandle.GetHashCode(), newRegionHandle);
+                    regionsByHash.Add(newRegionHandle.GetHashCode(), newRegionHandle);
                 }
             }
         }
@@ -180,7 +184,7 @@ namespace KekwDetlef.LOST
             foreach (AssetReference sceneAssetReference in sceneAssetReferences)
             {
                 int hashCode = comparer.GetHashCode(sceneAssetReference);
-                if (regionHandles.TryGetValue(hashCode, out RegionHandle regionHandle))
+                if (regionsByHash.TryGetValue(hashCode, out Region regionHandle))
                 {
                     _ = regionHandle.Unload();
                 }
@@ -196,10 +200,10 @@ namespace KekwDetlef.LOST
 
         private Task[] UnloadAllRegionsInternal()
         {
-            Task[] result = new Task[regionHandles.Count];
+            Task[] result = new Task[regionsByHash.Count];
             
             int index = 0;
-            foreach (var regionHandle in regionHandles)
+            foreach (var regionHandle in regionsByHash)
             {
                 result[index] = regionHandle.Value.Unload();
                 index++;
@@ -209,7 +213,7 @@ namespace KekwDetlef.LOST
 
         private Task[] UnloadAllRegions(AssetReference[] exceptions)
         {
-            HashSet<int> regionHandleHashCodes = regionHandles.Keys.ToHashSet();
+            HashSet<int> regionHandleHashCodes = regionsByHash.Keys.ToHashSet();
             foreach(AssetReference exception in exceptions)
             {
                 regionHandleHashCodes.Remove(new AssetReferenceGuidComparer().GetHashCode(exception));
@@ -220,7 +224,7 @@ namespace KekwDetlef.LOST
             int index = 0;
             foreach (int hashCode in regionHandleHashCodes)
             {
-                RegionHandle regionHandle = regionHandles[hashCode];
+                Region regionHandle = regionsByHash[hashCode];
                 result[index] = regionHandle.Unload();
                 index++;
             }
@@ -232,11 +236,11 @@ namespace KekwDetlef.LOST
         private void CollectGarbage(object sender, ElapsedEventArgs e)
         {
             List<int> freeHandlesHash = new List<int>();
-            foreach (var pair in regionHandles)
+            foreach (var pair in regionsByHash)
             {
-                RegionHandle regionHandle = pair.Value;
+                Region regionHandle = pair.Value;
 
-                if (regionHandle.IsFree)
+                if (regionHandle.IsUnloaded)
                 {
                     freeHandlesHash.Add(pair.Key);
                 }
@@ -244,7 +248,7 @@ namespace KekwDetlef.LOST
 
             foreach (int hash in freeHandlesHash)
             {
-                regionHandles.Remove(hash);
+                regionsByHash.Remove(hash);
             }
         }
 
@@ -253,6 +257,6 @@ namespace KekwDetlef.LOST
             gcTimer.Dispose();
         }
 
-        private bool CompareHash(RegionHandle regionHandle, AssetReference sceneAssetReference) => new AssetReferenceGuidComparer().GetHashCode(sceneAssetReference) == regionHandle.GetHashCode();
+        private bool IsCurrentlyLoadedLevel(AssetReference sceneAssetReference) => new AssetReferenceGuidComparer().GetHashCode(sceneAssetReference) == currentLevelRegionHandle.GetHashCode();
     }
 }

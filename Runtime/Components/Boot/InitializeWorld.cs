@@ -6,9 +6,19 @@ namespace KekwDetlef.LOST
     {
 
 #if UNITY_EDITOR
+        internal void Editor_Run(AssetReference sceneAssetReference)
+        {
+            // TODO: make sure AssetReference is valid and a scene
+
+            if (!Editor_OnRun(sceneAssetReference, out string errorMessage))
+            {
+                throw new System.Exception(errorMessage);
+            }
+        }
+
         protected override bool Editor_OnRun(AssetReference sceneAssetReference, out string errorMessage)
         {
-            if (WorldState.Initialize(sceneAssetReference))
+            if (World.Initialize(sceneAssetReference))
             {
                 errorMessage = null;
                 return true;
@@ -23,7 +33,7 @@ namespace KekwDetlef.LOST
         {
             if (sceneAssetReference == null) { return; }
 
-            WorldState.Initialize(sceneAssetReference);
+            World.Initialize(sceneAssetReference);
         }
     }
 }

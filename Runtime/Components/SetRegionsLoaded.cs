@@ -8,7 +8,7 @@ namespace KekwDetlef.LOST
 #if UNITY_EDITOR
         protected override bool Editor_OnRun(RegionLoadInfo[] regionLoadInfos, out string errorMessage)
         {
-            if (WorldState.GetInstance(out WorldState instance))
+            if (World.GetInstance(out World instance))
             {
                 instance.SetRegionsLoaded(regionLoadInfos);
                 errorMessage = null;
@@ -21,7 +21,7 @@ namespace KekwDetlef.LOST
 #endif // UNITY_EDITOR
         protected override void OnRun(RegionLoadInfo[] regionLoadInfos)
         {
-            if (WorldState.GetInstance(out WorldState instance))
+            if (World.GetInstance(out World instance))
             {
                 instance.SetRegionsLoaded(regionLoadInfos);
             }

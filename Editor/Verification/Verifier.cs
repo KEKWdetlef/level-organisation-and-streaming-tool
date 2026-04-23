@@ -4,11 +4,12 @@ using UnityEngine.SceneManagement;
 
 namespace KekwDetlef.LOST.Editor
 {
+    // TODO: make sure the boot scene only contains one bootscript
     internal class Verifier
     {
         internal bool Run()
         {
-            var setup = EditorSceneManager.GetSceneManagerSetup();
+            SceneSetup[] setup = EditorSceneManager.GetSceneManagerSetup();
             string[] guids = AssetDatabase.FindAssets("t:Scene", new[] { "Assets" });
             foreach (string guid in guids)
             {

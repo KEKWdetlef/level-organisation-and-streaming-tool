@@ -3,7 +3,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace KekwDetlef.LOST
 {
-    internal class Loaded : RegionState
+    internal class Loaded : SyncRegionLoadState
     {
         private readonly AsyncOperationHandle handle;
 
@@ -12,9 +12,9 @@ namespace KekwDetlef.LOST
             this.handle = handle;
         }
 
-        protected override IRegionState OnExecute() => null;
+        protected override RegionLoadState OnExecute() => null;
         
-        protected override IRegionState OnLoad(AssetReference sceneAssetReference, int priority, bool shouldReload)
+        protected override RegionLoadState OnLoad(AssetReference sceneAssetReference, int priority, bool shouldReload)
         {
             if (shouldReload)
             {
@@ -26,6 +26,6 @@ namespace KekwDetlef.LOST
             }
         }
 
-        protected override IRegionState OnUnload() => new Unloading(handle);
+        protected override RegionLoadState OnUnload() => new Unloading(handle);
     }
 }
