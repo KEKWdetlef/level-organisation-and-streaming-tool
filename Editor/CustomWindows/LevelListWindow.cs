@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -11,6 +10,8 @@ namespace KekwDetlef.LOST.Editor
 {
     internal class LevelListWindow : EditorWindow
     {
+        private SceneSetup[] setup;
+
         [MenuItem("Window/LOST/LevelList")]
         private static void CreateWindow()
         {
@@ -36,34 +37,15 @@ namespace KekwDetlef.LOST.Editor
                 return;
             }
 
-            Scene bootScene = SceneManager.GetSceneByBuildIndex(0);
-            if (!bootScene.IsValid())
-            {
-                Debug.LogError("TODO: Write error message for invalid bootscene");
-                return;
-            }
+            if (!Helper.GetBootScene(out Scene bootScene)) { return; }
 
-            SceneSetup[] setup = EditorSceneManager.GetSceneManagerSetup();
+            setup = EditorSceneManager.GetSceneManagerSetup();
             
             bootScene = EditorSceneManager.OpenScene(bootScene.path);
-            
-            List<Boot> bootScripts = new List<Boot>();
-            foreach (var root in bootScene.GetRootGameObjects())
-            {
-                bootScripts.AddRange(root.GetComponentsInChildren<Boot>(true));
-            }
-
-            if (bootScripts.Count != 1)
-            {
-                Debug.LogError("TODO: write error message for invalid amound of bootscripts");
-                return;
-            }
-
-            Boot bootScript = bootScripts[0];
 
             // TODO: get the actual sceneAssetReference from the SceneList
             AssetReference sceneAssetReference = new AssetReference();
-            bootScript.InjectSceneAssetReference(sceneAssetReference);
+            EditorBootInjector.Set(sceneAssetReference);
 
             EditorApplication.EnterPlaymode();
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
@@ -72,9 +54,11 @@ namespace KekwDetlef.LOST.Editor
         private void OnPlayModeStateChanged(PlayModeStateChange change)
         {
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-
-            EditorSceneManager.RestoreSceneManagerSetup(setup);
-            throw new NotImplementedException();
+            
+            if (change == PlayModeStateChange.ExitingPlayMode)
+            {
+                EditorSceneManager.RestoreSceneManagerSetup(setup);
+            }
         }
     }
 }

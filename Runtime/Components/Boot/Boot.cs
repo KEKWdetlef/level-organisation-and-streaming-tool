@@ -1,16 +1,18 @@
-using KekwDetlef.LOST;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
-public abstract class Boot : MonoBehaviour
+namespace KekwDetlef.LOST
 {
-    [SerializeField] protected InitializeWorld initializeWorld;
+    public abstract class Boot : MonoBehaviour
+    {
+        [SerializeField] protected InitializeWorld initializeWorld;
 
-#if UNITY_EDITOR
-    internal abstract void Editor_Run(AssetReference sceneAssetReference);
-#else
-    protected void Start() => Run();
-    protected abstract void Run();
-#endif // UNITY_EDITOR
+    #if UNITY_EDITOR
+        internal abstract void Editor_Run(AssetReference sceneAssetReference);
+    #else
+        protected void Start() => Run();
+        protected abstract void Run();
+    #endif // UNITY_EDITOR
 
+    }
 }
