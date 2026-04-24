@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UIElements;
 
 namespace KekwDetlef.LOST.Editor
@@ -14,25 +15,56 @@ namespace KekwDetlef.LOST.Editor
             window.titleContent = new GUIContent("LevelListWindow");
         }
 
-
+        private const string Slot = "LevelListWindow_LevelSceneList";
         [SerializeField] private BaseSceneList levelSceneList = null;
+
+        private void OnEnable()
+        {
+            if (EditorPrefs.HasKey(Slot))
+            {
+                string jsonString = EditorPrefs.GetString(Slot);
+            }
+        }
+
+        private void OnDisable()
+        {
+            
+        }
+
+        ListView listView;
 
         private void CreateGUI()
         {
-            // Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
 
-            VisualElement levelSceneListField = new ObjectField()
+            ObjectField levelSceneListField = new ObjectField()
             {
                 objectType = typeof(BaseSceneList),
                 label = "Level Scene List",
             };
-
             root.Add(levelSceneListField);
 
-            // VisualElements objects can contain other VisualElement following a tree hierarchy.
-            VisualElement label = new Label("Hello World! From C#");
-            root.Add(label);
+            listView = new ListView();
+            root.Add(listView);
+
+            levelSceneListField.RegisterValueChangedCallback((evt) => OnSceneListChanged(evt.newValue as BaseSceneList));
+        }
+
+        private void OnSceneListChanged(BaseSceneList newSceneList) 
+        {
+            levelSceneList = newSceneList;
+
+            if (levelSceneList == null) { return; }
+
+            AssetReference[] sceneAssetReferences = levelSceneList.GetSceneReferences();
+            if (sceneAssetReferences == null) { return; }
+
+            listView.makeItem = () => new Label();
+            listView.bindItem = (item, index) =>
+            {
+                (item as Label).text = sceneAssetReferences[index].editorAsset.name;
+            };
+            listView.itemsSource = sceneAssetReferences;
         }
 
 
@@ -49,7 +81,7 @@ namespace KekwDetlef.LOST.Editor
         //     if (!EditorHelper.GetBootScenePath(out string bootScenePath)) { return; }
 
         //     setup = EditorSceneManager.GetSceneManagerSetup();
-            
+
         //     Scene bootScene = EditorSceneManager.OpenScene(bootScenePath);
 
         //     // TODO: get the actual sceneAssetReference from the SceneList
@@ -63,7 +95,7 @@ namespace KekwDetlef.LOST.Editor
         // private void OnPlayModeStateChanged(PlayModeStateChange change)
         // {
         //     EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-            
+
         //     if (change == PlayModeStateChange.ExitingPlayMode)
         //     {
         //         EditorSceneManager.RestoreSceneManagerSetup(setup);
