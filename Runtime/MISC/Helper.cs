@@ -21,17 +21,5 @@ namespace KekwDetlef.LOST
         {
             throw new System.Exception("TODO: write failed to create scene exception");
         }
-
-        internal static bool GetBootScene(out Scene bootScene)
-        {
-            bootScene = SceneManager.GetSceneByBuildIndex(0);
-            if (!bootScene.IsValid())
-            {
-                Debug.LogError("TODO: Write error message for invalid bootscene");
-                return false;
-            }
-
-            return true;
-        }
     }
 }

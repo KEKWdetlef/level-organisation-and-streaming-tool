@@ -1,17 +1,12 @@
-using System;
 using UnityEditor;
-using UnityEditor.SceneManagement;
+using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace KekwDetlef.LOST.Editor
 {
     internal class LevelListWindow : EditorWindow
     {
-        private SceneSetup[] setup;
-
         [MenuItem("Window/LOST/LevelList")]
         private static void CreateWindow()
         {
@@ -19,46 +14,60 @@ namespace KekwDetlef.LOST.Editor
             window.titleContent = new GUIContent("LevelListWindow");
         }
 
+
+        [SerializeField] private BaseSceneList levelSceneList = null;
+
         private void CreateGUI()
         {
             // Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
+
+            VisualElement levelSceneListField = new ObjectField()
+            {
+                objectType = typeof(BaseSceneList),
+                label = "Level Scene List",
+            };
+
+            root.Add(levelSceneListField);
 
             // VisualElements objects can contain other VisualElement following a tree hierarchy.
             VisualElement label = new Label("Hello World! From C#");
             root.Add(label);
         }
 
-        private void Test()
-        {
-            if (EditorApplication.isPlaying)
-            {
-                Debug.LogError("TODO: Write error that no level can be played while already in playmode");
-                return;
-            }
 
-            if (!Helper.GetBootScene(out Scene bootScene)) { return; }
 
-            setup = EditorSceneManager.GetSceneManagerSetup();
+        // private SceneSetup[] setup;
+        // private void Test()
+        // {
+        //     if (EditorApplication.isPlaying)
+        //     {
+        //         Debug.LogError("TODO: Write error that no level can be played while already in playmode");
+        //         return;
+        //     }
+
+        //     if (!EditorHelper.GetBootScenePath(out string bootScenePath)) { return; }
+
+        //     setup = EditorSceneManager.GetSceneManagerSetup();
             
-            bootScene = EditorSceneManager.OpenScene(bootScene.path);
+        //     Scene bootScene = EditorSceneManager.OpenScene(bootScenePath);
 
-            // TODO: get the actual sceneAssetReference from the SceneList
-            AssetReference sceneAssetReference = new AssetReference();
-            EditorBootInjector.Set(sceneAssetReference);
+        //     // TODO: get the actual sceneAssetReference from the SceneList
+        //     AssetReference sceneAssetReference = new AssetReference();
+        //     EditorBootInjector.Set(sceneAssetReference);
 
-            EditorApplication.EnterPlaymode();
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-        }
+        //     EditorApplication.EnterPlaymode();
+        //     EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        // }
 
-        private void OnPlayModeStateChanged(PlayModeStateChange change)
-        {
-            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+        // private void OnPlayModeStateChanged(PlayModeStateChange change)
+        // {
+        //     EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             
-            if (change == PlayModeStateChange.ExitingPlayMode)
-            {
-                EditorSceneManager.RestoreSceneManagerSetup(setup);
-            }
-        }
+        //     if (change == PlayModeStateChange.ExitingPlayMode)
+        //     {
+        //         EditorSceneManager.RestoreSceneManagerSetup(setup);
+        //     }
+        // }
     }
 }

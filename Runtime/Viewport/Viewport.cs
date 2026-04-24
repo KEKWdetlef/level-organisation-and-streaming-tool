@@ -49,6 +49,7 @@ namespace KekwDetlef.LOST
 
         private void OnSceneUnloaded(Scene unloadedScene)
         {
+            // TODO: unless the game is shutting down
             if (viewport.handle.Equals(unloadedScene.handle))
             {
                 throw new System.InvalidOperationException("The viewport may not be unloaded, unless the game is shuting down.");

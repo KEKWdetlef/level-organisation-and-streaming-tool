@@ -7,7 +7,7 @@ namespace KekwDetlef.LOST
     {
 
 #if UNITY_EDITOR
-        internal override void Editor_Run(AssetReference sceneAssetReference)
+        protected override void Editor_OnRun(AssetReference sceneAssetReference)
         {
             if (sceneAssetReference == null)
             {

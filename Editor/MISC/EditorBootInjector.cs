@@ -41,14 +41,21 @@ namespace KekwDetlef.LOST.Editor
         {
             SceneManager.sceneLoaded -= OnFirstSceneLoaded;
 
-            if (!Helper.GetBootScene(out Scene bootScene) || !bootScene.handle.Equals(scene.handle)) 
+            if (!EditorHelper.GetBootScenePath(out string bootScenePath))
+            {
+                Clear();
+                Debug.LogError("TODO: write error message for no valid boot scene set.");
+                return;
+            }
+
+            if (!scene.path.Equals(bootScenePath)) 
             { 
                 Clear();
                 return; 
             }
 
             List<Boot> bootScripts = new List<Boot>();
-            foreach (var root in bootScene.GetRootGameObjects())
+            foreach (var root in scene.GetRootGameObjects())
             {
                 bootScripts.AddRange(root.GetComponentsInChildren<Boot>(true));
             }
@@ -63,10 +70,8 @@ namespace KekwDetlef.LOST.Editor
 
             Boot bootScript = bootScripts[0];
 
-            if (Consume(out AssetReference sceneAssetReference))
-            {
-                bootScript.Editor_Run(sceneAssetReference);
-            }
+            AssetReference sceneAssetReference = Consume();
+            bootScript.Editor_Run(sceneAssetReference);
         }
 
         internal static void Set(AssetReference sceneAssetReference)
@@ -86,19 +91,17 @@ namespace KekwDetlef.LOST.Editor
             SessionState.SetString(SceneGuidKey, sceneAssetReference.AssetGUID);
         }
 
-        private static bool Consume(out AssetReference sceneAssetReference)
+        private static AssetReference Consume()
         {
             string guid = SessionState.GetString(SceneGuidKey, string.Empty);
 
             if (string.IsNullOrEmpty(guid))
             {
-                sceneAssetReference = null;
-                return false;
+                return null;
             }
 
             SessionState.EraseString(SceneGuidKey);
-            sceneAssetReference = new AssetReference(guid);
-            return true;
+            return new AssetReference(guid);
         }
     }
 }

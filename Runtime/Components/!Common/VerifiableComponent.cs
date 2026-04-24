@@ -42,7 +42,7 @@ namespace KekwDetlef.LOST
         /// WARNING: AN IMPLEMENTATION OF THIS FUNCTION MUST BE GUAREDED BY (#if UNITY_EDITOR) PREPROCESSOR DIRECTIVES.
         /// <para />
         /// 
-        /// Implement this function to verify and cook this objects data for a build.
+        /// Implement this function to verify and cook this objects data for a build. This function will be executed automatically.
         /// </summary>
         /// <param name="errorMessage"> Error message to be printed to the console in the case that the verification faild. 
         /// Expected to be valid if return value is false, otherwise invalid. 
@@ -112,11 +112,13 @@ namespace KekwDetlef.LOST
         /// </summary>
         public void Run()
         {
+            
 #if UNITY_EDITOR
             Editor_Run();
 #else
             OnRun();
 #endif // UNITY_EDITOR
+
         }
 
         /// <summary>
