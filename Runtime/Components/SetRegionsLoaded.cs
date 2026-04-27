@@ -1,8 +1,7 @@
-using UnityEngine;
 
 namespace KekwDetlef.LOST
 {
-    public class SetRegionsLoaded : VerifiableComponentMultipleRegionLoadInfos
+    public class SetRegionsLoaded : ComponentMultiple<VerifiableRegionLoadInfo<LevelAsset>, RegionLoadInfo, LevelAsset>
     {
 
 #if UNITY_EDITOR

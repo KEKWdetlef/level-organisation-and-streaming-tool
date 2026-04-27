@@ -5,9 +5,9 @@ namespace KekwDetlef.LOST
 {
     /// <summary>
     /// Base class for defining boot behaviour. LOST requires there to be exactly one boot object in the boot scene. 
-    /// See <see cref="DefaultBoot"/> for the default boot implementation. 
+    /// See <see cref="DefaultBootScript"/> for the default boot implementation. 
     /// </summary>
-    public abstract class Boot : MonoBehaviour
+    public abstract class BootScript : MonoBehaviour
     {
         [SerializeField] protected InitializeWorld initializeWorld;
 
@@ -17,7 +17,7 @@ namespace KekwDetlef.LOST
         /// as i a build the the boot script runs automatically on start. 
         /// </summary>
         /// <param name="sceneAssetReference"> The scene asset reference loaded as the first level. Invalid if the default scene asset reference should be used. </param>
-        internal void Editor_Run(AssetReference sceneAssetReference) => Editor_OnRun(sceneAssetReference);
+        internal void Editor_Run(RegionAssetReference sceneAssetReference) => Editor_OnRun(sceneAssetReference);
          
         /// <summary>
         /// WARNING: AN IMPLEMENTATION OF THIS FUNCTION MUST BE GUAREDED BY (#if UNITY_EDITOR) PREPROCESSOR DIRECTIVES.
@@ -26,7 +26,7 @@ namespace KekwDetlef.LOST
         /// Function to be implemented to run the boot script in editor. This function will be executed automatically.
         /// </summary>
         /// <param name="sceneAssetReference"> The scene asset reference loaded as the first level. Invalid if the default scene asset reference should be used. </param>
-        protected abstract void Editor_OnRun(AssetReference sceneAssetReference);
+        protected abstract void Editor_OnRun(RegionAssetReference sceneAssetReference);
     #else
         protected void Start() => Run();
 

@@ -1,8 +1,10 @@
+
+#if UNITY_EDITOR
 using System;
 using UnityEditor;
 using UnityEngine.AddressableAssets;
 
-namespace KekwDetlef.LOST.Editor
+namespace KekwDetlef.LOST
 {
     [Serializable]
     public class SceneAssetReference : AssetReferenceT<SceneAsset>
@@ -10,3 +12,5 @@ namespace KekwDetlef.LOST.Editor
         public SceneAssetReference(string guid) : base(guid) { }
     }
 }
+
+#endif // UNITY_EDITOR

@@ -5,40 +5,32 @@ using UnityEngine.AddressableAssets;
 namespace KekwDetlef.LOST
 {
     [Serializable]
-    public class VerifiableRegionLoadInfo<T> : IEquatable<VerifiableRegionLoadInfo<T>>, ISceneListSettable, IVerifiable<RegionLoadInfo> where T : VerifiableSceneAssetReference
+    public class VerifiableRegionLoadInfo<TProvider> : IEquatable<VerifiableRegionLoadInfo<TProvider>>
+                                                     , IRegionListProviderSettable<TProvider>
+                                                     , IVerifiable<RegionLoadInfo>
+    where TProvider : ScriptableObject, IRegionListProvider
     {
-        [SerializeField] private T verifyableSceneAssetReference;
+        [SerializeField] private VerifiableRegionAssetReference<TProvider> verifyableRegionAssetReference;
         [SerializeField, Range(0, 100)] private int priority;
         [SerializeField] private bool shouldReload;
 
-        public VerifiableRegionLoadInfo(T verifyableSceneAssetReference, int priority, bool shouldReload)
-        {
-            this.verifyableSceneAssetReference = verifyableSceneAssetReference;
-            this.priority = priority;
-            this.shouldReload = shouldReload;
-        }
+        private VerifiableRegionLoadInfo() { }
 
-        public void SetSceneList(BaseSceneList sceneList)
-        {
-            if (verifyableSceneAssetReference == null)
-            { return; }
-
-            verifyableSceneAssetReference.SetSceneList(sceneList);
-        }
+        public void SetRegionListProvider(TProvider regionListProvider) => verifyableRegionAssetReference?.SetRegionListProvider(regionListProvider);
 
         public bool Verify(out RegionLoadInfo regionLoadInfo, out string errorMessage)
         {
-            if (verifyableSceneAssetReference == null)
+            if (verifyableRegionAssetReference == null)
             {
                 regionLoadInfo = null;
                 errorMessage = "TODO: write error that the internal 'verifyableSceneAssetReference' is null";
                 return false;
             }
 
-            bool result = verifyableSceneAssetReference.Verify(out AssetReference sceneAssetReference, out errorMessage);
+            bool result = verifyableRegionAssetReference.Verify(out RegionAssetReference regionAssetReference, out errorMessage);
             if (result)
             {
-                regionLoadInfo = new RegionLoadInfo(sceneAssetReference, priority, shouldReload);
+                regionLoadInfo = new RegionLoadInfo(regionAssetReference, priority, shouldReload);
                 return true;
             }
 
@@ -47,9 +39,9 @@ namespace KekwDetlef.LOST
         } 
 
 #region IEquatable
-        public bool Equals(VerifiableRegionLoadInfo<T> other) => verifyableSceneAssetReference?.Equals(other.verifyableSceneAssetReference) ?? false ;
-        public override int GetHashCode() => verifyableSceneAssetReference?.GetHashCode() ?? 0;
-        public override bool Equals(object obj) => Equals(obj as VerifiableRegionLoadInfo<T>);
+        public bool Equals(VerifiableRegionLoadInfo<TProvider> other) => verifyableRegionAssetReference?.Equals(other.verifyableRegionAssetReference) ?? false ;
+        public override int GetHashCode() => verifyableRegionAssetReference?.GetHashCode() ?? 0;
+        public override bool Equals(object obj) => Equals(obj as VerifiableRegionLoadInfo<TProvider>);
 #endregion // IEquatable
     }
 }

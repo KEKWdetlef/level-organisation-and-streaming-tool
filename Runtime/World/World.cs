@@ -146,7 +146,7 @@ namespace KekwDetlef.LOST
             for (int i = 0; i < length; i++)
             {
                 RegionLoadInfo loadInfo = loadInfos[i];
-                exceptions[i] = loadInfo.SceneAssetReference;
+                exceptions[i] = loadInfo.RegionAssetReference;
             }
 
             UnloadAllRegions(exceptions);
@@ -161,14 +161,14 @@ namespace KekwDetlef.LOST
 
             foreach (RegionLoadInfo loadInfo in loadInfos)
             {
-                int hashCode = comparer.GetHashCode(loadInfo.SceneAssetReference);
+                int hashCode = comparer.GetHashCode(loadInfo.RegionAssetReference);
                 if (regionsByHash.TryGetValue(hashCode, out Region regionHandle))
                 {
                     _ = regionHandle.Load(loadInfo.Priority, loadInfo.ShouldReload);
                 }
                 else
                 {
-                    Region newRegionHandle = new Region(loadInfo.SceneAssetReference);
+                    Region newRegionHandle = new Region(loadInfo.RegionAssetReference);
                     _ = newRegionHandle.Load(loadInfo.Priority, loadInfo.ShouldReload);
                     regionsByHash.Add(newRegionHandle.GetHashCode(), newRegionHandle);
                 }

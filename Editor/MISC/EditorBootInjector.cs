@@ -54,10 +54,10 @@ namespace KekwDetlef.LOST.Editor
                 return; 
             }
 
-            List<Boot> bootScripts = new List<Boot>();
+            List<BootScript> bootScripts = new List<BootScript>();
             foreach (var root in scene.GetRootGameObjects())
             {
-                bootScripts.AddRange(root.GetComponentsInChildren<Boot>(true));
+                bootScripts.AddRange(root.GetComponentsInChildren<BootScript>(true));
             }
 
             if (bootScripts.Count != 1)
@@ -68,13 +68,13 @@ namespace KekwDetlef.LOST.Editor
                 return;
             }
 
-            Boot bootScript = bootScripts[0];
+            BootScript bootScript = bootScripts[0];
 
-            AssetReference sceneAssetReference = Consume();
+            RegionAssetReference sceneAssetReference = Consume();
             bootScript.Editor_Run(sceneAssetReference);
         }
 
-        internal static void Set(AssetReference sceneAssetReference)
+        internal static void Set(RegionAssetReference sceneAssetReference)
         {
             if (EditorApplication.isPlaying)
             {
@@ -91,7 +91,7 @@ namespace KekwDetlef.LOST.Editor
             SessionState.SetString(SceneGuidKey, sceneAssetReference.AssetGUID);
         }
 
-        private static AssetReference Consume()
+        private static RegionAssetReference Consume()
         {
             string guid = SessionState.GetString(SceneGuidKey, string.Empty);
 
@@ -101,7 +101,7 @@ namespace KekwDetlef.LOST.Editor
             }
 
             SessionState.EraseString(SceneGuidKey);
-            return new AssetReference(guid);
+            return new RegionAssetReference(guid);
         }
     }
 }

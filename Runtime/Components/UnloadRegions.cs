@@ -1,12 +1,11 @@
-using UnityEngine.AddressableAssets;
 
 namespace KekwDetlef.LOST
 {
-    public class UnloadRegions : VerifiableComponentMultipleSceneAssetReferences
+    public class UnloadRegions : ComponentMultiple<VerifiableRegionAssetReference<LevelAsset>, RegionAssetReference, LevelAsset>
     {
 
 #if UNITY_EDITOR
-        protected override bool Editor_OnRun(AssetReference[] sceneAssetReferences, out string errorMessage)
+        protected override bool Editor_OnRun(RegionAssetReference[] sceneAssetReferences, out string errorMessage)
         {
             if (World.GetInstance(out World instance))
             {
@@ -20,7 +19,7 @@ namespace KekwDetlef.LOST
         }
 #endif // UNITY_EDITOR
 
-        protected override void OnRun(AssetReference[] sceneAssetReferences)
+        protected override void OnRun(RegionAssetReference[] sceneAssetReferences)
         {
             if (World.GetInstance(out World instance))
             {

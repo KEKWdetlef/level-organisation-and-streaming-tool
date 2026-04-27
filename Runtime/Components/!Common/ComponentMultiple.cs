@@ -1,35 +1,37 @@
 using System.Collections.Generic;
 using KekwDetlef.SerializedCollections;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace KekwDetlef.LOST
 {
-    public abstract class VerifiableComponentMultiple<TEditor, TRuntime> : VerifiableComponent where TEditor : IVerifiable<TRuntime>, ISceneListSettable
+    public abstract class ComponentMultiple<TEditor, TRuntime, TProvider> : VerifiableComponent
+                                                                          , IRegionListProviderSettable<TProvider>
+    where TEditor : IVerifiable<TRuntime>, IRegionListProviderSettable<TProvider>
+    where TProvider : ScriptableObject, IRegionListProvider
     {
 
+        // TODO: fix this cuz needs to be in editor guards
+        public void SetRegionListProvider(TProvider regionListProvider)
+        {
+
 #if UNITY_EDITOR
-        [SerializeField] private SDictionary<BaseSceneList, SHashSet<TEditor>> verifiables = new SDictionary<BaseSceneList, SHashSet<TEditor>>();
+            this.regionListProvider = regionListProvider;
+#endif // UNITY_EDITOR
+
+        }
+
+#if UNITY_EDITOR
+        [SerializeField, HideInInspector] private TProvider regionListProvider = null;
+        [SerializeField] private SHashSet<TEditor> verifiables = new SHashSet<TEditor>();
 
         protected void OnValidate()
         {
             var newValue = verifiables.Editor_NewValue;
-            if (newValue != null)
-            {
-                newValue.Value.Editor_NewValue.SetSceneList(newValue.Key);
+            newValue?.SetRegionListProvider(regionListProvider);
 
-                foreach (TEditor newVerifiable in newValue.Value)
-                {
-                    newVerifiable.SetSceneList(newValue.Key);
-                }
-            }
-
-            foreach (var pair in verifiables)
+            foreach (TEditor verifiable in verifiables)
             {
-                foreach (TEditor newVerifiable in pair.Value)
-                {
-                    newVerifiable.SetSceneList(pair.Key);
-                }
+                verifiable.SetRegionListProvider(regionListProvider);
             }
 
             OnAfterValidate();
@@ -43,19 +45,16 @@ namespace KekwDetlef.LOST
             errorMessage = string.Empty;
 
             List<TRuntime> datas = new List<TRuntime>();
-            foreach (var pair in verifiables)
+            foreach (TEditor verifiable in verifiables)
             {
-                foreach (TEditor verifiable in pair.Value)
+                if (verifiable.Verify(out TRuntime runtimeData, out string verifyErrorMessage))
                 {
-                    if (verifiable.Verify(out TRuntime runtimeData, out string verifyErrorMessage))
-                    {
-                        datas.Add(runtimeData);
-                    }
-                    else
-                    {
-                        errorMessage += $"\n\n {verifyErrorMessage}";
-                        result = false;
-                    }
+                    datas.Add(runtimeData);
+                }
+                else
+                {
+                    errorMessage += $"\n\n {verifyErrorMessage}";
+                    result = false;
                 }
             }
 
@@ -99,8 +98,4 @@ namespace KekwDetlef.LOST
         protected sealed override void OnRun() => OnRun(runtimeDatas);
         protected abstract void OnRun(TRuntime[] runtimeDatas);
     }
-
-
-    public abstract class VerifiableComponentMultipleSceneAssetReferences : VerifiableComponentMultiple<VerifiableSceneReferenceHiddenSceneList, AssetReference> { }
-    public abstract class VerifiableComponentMultipleRegionLoadInfos : VerifiableComponentMultiple<VerifiableRegionLoadInfo<VerifiableSceneReferenceHiddenSceneList>, RegionLoadInfo> { }
 }

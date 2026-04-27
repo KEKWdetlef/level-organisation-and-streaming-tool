@@ -12,14 +12,6 @@ namespace KekwDetlef.LOST
 
 #if UNITY_EDITOR
         private bool isWaitingForUnpause = false;
-
-        private void Editor_LogError(string errorMessage)
-        {
-            // TODO: test if this works fine
-            // TODO: im sure i can find some more usefull information to add here.
-            string quallifiedErrorMessage = $"{gameObject.scene.name}/{gameObject.name}/{GetType().Name}\n\n{errorMessage}";
-            Debug.LogError(quallifiedErrorMessage, this);
-        }
         
         /// <summary>
         /// Checks if the data of this object is valid. If not an error message describing the issue is printed to the console.
@@ -105,6 +97,14 @@ namespace KekwDetlef.LOST
         /// </param>
         /// <returns> Returns false if the execution failed, otherwise true. </returns>
         protected abstract bool Editor_OnRun(out string errorMessage);
+
+        private void Editor_LogError(string errorMessage)
+        {
+            // TODO: test if this works fine
+            // TODO: im sure i can find some more usefull information to add here.
+            string quallifiedErrorMessage = $"{gameObject.scene.name}/{gameObject.name}/{GetType().Name}\n\n{errorMessage}";
+            Debug.LogError(quallifiedErrorMessage, this);
+        }
 #endif // UNITY_EDITOR
 
         /// <summary>

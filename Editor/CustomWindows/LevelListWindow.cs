@@ -16,7 +16,7 @@ namespace KekwDetlef.LOST.Editor
         }
 
         private const string Slot = "LevelListWindow_LevelSceneList";
-        [SerializeField] private BaseSceneList levelSceneList = null;
+        [SerializeField] private LevelList levelSceneList = null;
 
         private void OnEnable()
         {
@@ -39,7 +39,7 @@ namespace KekwDetlef.LOST.Editor
 
             ObjectField levelSceneListField = new ObjectField()
             {
-                objectType = typeof(BaseSceneList),
+                objectType = typeof(LevelList),
                 label = "Level Scene List",
             };
             root.Add(levelSceneListField);
@@ -47,25 +47,25 @@ namespace KekwDetlef.LOST.Editor
             listView = new ListView();
             root.Add(listView);
 
-            levelSceneListField.RegisterValueChangedCallback((evt) => OnSceneListChanged(evt.newValue as BaseSceneList));
+            // levelSceneListField.RegisterValueChangedCallback((evt) => OnSceneListChanged(evt.newValue as BaseLevelList));
         }
 
-        private void OnSceneListChanged(BaseSceneList newSceneList) 
-        {
-            levelSceneList = newSceneList;
+        // private void OnSceneListChanged(BaseLevelList newSceneList) 
+        // {
+        //     levelSceneList = newSceneList;
 
-            if (levelSceneList == null) { return; }
+        //     if (levelSceneList == null) { return; }
 
-            AssetReference[] sceneAssetReferences = levelSceneList.GetSceneReferences();
-            if (sceneAssetReferences == null) { return; }
+        //     BaseLevelAsset[] sceneAssetReferences = levelSceneList.LevelAssets;
+        //     if (sceneAssetReferences == null) { return; }
 
-            listView.makeItem = () => new Label();
-            listView.bindItem = (item, index) =>
-            {
-                (item as Label).text = sceneAssetReferences[index].editorAsset.name;
-            };
-            listView.itemsSource = sceneAssetReferences;
-        }
+        //     listView.makeItem = () => new Label();
+        //     listView.bindItem = (item, index) =>
+        //     {
+        //         (item as Label).text = sceneAssetReferences[index].editorAsset.name;
+        //     };
+        //     listView.itemsSource = sceneAssetReferences;
+        // }
 
 
 

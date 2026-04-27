@@ -1,13 +1,12 @@
-using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 
 namespace KekwDetlef.LOST
 {
-    public class DefaultBoot : Boot
+    public class DefaultBootScript : BootScript
     {
 
 #if UNITY_EDITOR
-        protected override void Editor_OnRun(AssetReference sceneAssetReference)
+        protected override void Editor_OnRun(RegionAssetReference sceneAssetReference)
         {
             if (sceneAssetReference == null)
             {

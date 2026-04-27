@@ -7,17 +7,17 @@ namespace KekwDetlef.LOST
     [Serializable]
     public class RegionLoadInfo
     {
-        [SerializeField] private AssetReference sceneAssetReference;
+        [SerializeField] private RegionAssetReference regionAssetReference;
         [SerializeField, Range(0, 100)] private int priority;
         [SerializeField] private bool shouldReload;
 
-        public AssetReference SceneAssetReference => sceneAssetReference;
+        public AssetReference RegionAssetReference => regionAssetReference;
         public int Priority => priority;
         public bool ShouldReload => shouldReload;
 
-        public RegionLoadInfo(AssetReference sceneAssetReference, int priority, bool shouldReload)
+        public RegionLoadInfo(RegionAssetReference regionAssetReference, int priority, bool shouldReload)
         {
-            this.sceneAssetReference = sceneAssetReference;
+            this.regionAssetReference = regionAssetReference;
             this.priority = priority;
             this.shouldReload = shouldReload;
         }

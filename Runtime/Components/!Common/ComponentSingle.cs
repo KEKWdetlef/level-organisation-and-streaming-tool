@@ -3,12 +3,17 @@ using UnityEngine.AddressableAssets;
 
 namespace KekwDetlef.LOST
 {
-    public abstract class VerifiableComponentSingle<TEditor, TRuntime> : VerifiableComponent where TEditor : IVerifiable<TRuntime>
+    public abstract class ComponentSingle<TEditor, TRuntime, TProvider> : VerifiableComponent 
+                                                                        , IRegionListProviderSettable<TProvider>
+    where TEditor : IVerifiable<TRuntime>, IRegionListProviderSettable<TProvider>
+    where TProvider : ScriptableObject, IRegionListProvider
     {
         
 #if UNITY_EDITOR
         [SerializeField] private TEditor verifiable = default;
-        
+
+        public void SetRegionListProvider(TProvider regionListProvider) => verifiable.SetRegionListProvider(regionListProvider);
+
         protected sealed override bool Editor_OnVerify(out string errorMessage)
         {
             if (verifiable.Verify(out TRuntime runtimeData, out errorMessage))
@@ -38,8 +43,4 @@ namespace KekwDetlef.LOST
         protected sealed override void OnRun() => OnRun(runtimeData);
         protected abstract void OnRun(TRuntime runtimeData);
     }
-
-
-    public abstract class VerifiableComponentSingleSceneAssetReference : VerifiableComponentSingle<VerifiableSceneAssetReference, AssetReference> { }
-    public abstract class VerifiableComponentSingleRegionLoadInfo : VerifiableComponentSingle<VerifiableRegionLoadInfo<VerifiableSceneAssetReference>, RegionLoadInfo> { }
 }
